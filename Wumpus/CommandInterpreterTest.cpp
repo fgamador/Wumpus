@@ -66,43 +66,43 @@ public:
 TEST_CASE("CommandInterpreter")
 {
     GameCommandsSpy commands;
-    CommandInterpreter interpreter(commands, PlayerStateStub());
+    CommandInterpreter interp(commands, PlayerStateStub());
 
     SECTION("Initial state")
     {
-        auto output = interpreter.Input("");
+        auto output = interp.Input("");
         REQUIRE(commands.invoked.empty());
         RequireInitialMsg(output);
     }
 
     SECTION("Awaiting command")
     {
-        interpreter.Input("");
+        interp.Input("");
 
         SECTION("Empty input")
         {
-            strvec output = interpreter.Input("");
+            strvec output = interp.Input("");
             REQUIRE(commands.invoked.empty());
             REQUIRE(output == strvec({ Msg::ShootOrMove }));
         }
 
         SECTION("Unrecognized input")
         {
-            strvec output = interpreter.Input("X");
+            strvec output = interp.Input("X");
             REQUIRE(commands.invoked.empty());
             REQUIRE(output == strvec({ Msg::Huh, Msg::ShootOrMove }));
         }
 
         SECTION("M input")
         {
-            strvec output = interpreter.Input("M");
+            strvec output = interp.Input("M");
             REQUIRE(commands.invoked.empty());
             REQUIRE(output == strvec({ Msg::WhereTo }));
         }
 
         SECTION("m input")
         {
-            strvec output = interpreter.Input("M");
+            strvec output = interp.Input("M");
             REQUIRE(commands.invoked.empty());
             REQUIRE(output == strvec({ Msg::WhereTo }));
         }
@@ -110,26 +110,26 @@ TEST_CASE("CommandInterpreter")
 
     SECTION("Awaiting move room number")
     {
-        interpreter.Input("");
-        interpreter.Input("M");
+        interp.Input("");
+        interp.Input("M");
 
         SECTION("Empty input")
         {
-            strvec output = interpreter.Input("");
+            strvec output = interp.Input("");
             REQUIRE(commands.invoked.empty());
             REQUIRE(output == strvec({ Msg::WhereTo }));
         }
 
         SECTION("Unparsable input")
         {
-            strvec output = interpreter.Input("X");
+            strvec output = interp.Input("X");
             REQUIRE(commands.invoked.empty());
             REQUIRE(output == strvec({ Msg::Huh, Msg::WhereTo }));
         }
 
         SECTION("Room-number input")
         {
-            strvec output = interpreter.Input("2");
+            strvec output = interp.Input("2");
             REQUIRE(commands.invoked == strvec({ "MovePlayer 2" }));
             RequireInitialMsg(output);
         }
@@ -137,7 +137,7 @@ TEST_CASE("CommandInterpreter")
         SECTION("Room-number input, no such room")
         {
             commands.WillThrowNoSuchRoomException();
-            strvec output = interpreter.Input("21");
+            strvec output = interp.Input("21");
             REQUIRE(commands.invoked.empty());
             REQUIRE(output == strvec({ Msg::Impossible, Msg::WhereTo }));
         }
@@ -145,7 +145,7 @@ TEST_CASE("CommandInterpreter")
         SECTION("Room-number input, unconnected room")
         {
             commands.WillThrowRoomsNotConnectedException();
-            strvec output = interpreter.Input("5");
+            strvec output = interp.Input("5");
             REQUIRE(commands.invoked.empty());
             REQUIRE(output == strvec({ Msg::Impossible, Msg::WhereTo }));
         }
@@ -153,11 +153,11 @@ TEST_CASE("CommandInterpreter")
 
     SECTION("Stream I/O")
     {
-        ostringstream input;
-        input << "M" << endl;
+        stringstream in;
+        in << "M" << endl;
         ostringstream out;
 
-        interpreter.Run(istringstream(input.str()), out);
+        interp.Run(in, out);
 
         ostringstream expected;
         expected
