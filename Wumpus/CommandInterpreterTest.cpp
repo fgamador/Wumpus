@@ -2,21 +2,17 @@
 
 #include "CommandInterpreter.h"
 #include "GameCommands.h"
+#include "Msg.h"
 #include "PlayerState.h"
 
 namespace {
-    const string Impossible = "IMPOSSIBLE";
-    const string ShootOrMove = "SHOOT OR MOVE (S-M)? ";
-    const string UnrecognizedInput = "HUH?";
-    const string WhereTo = "WHERE TO? ";
-
     void RequireInitialMsg(const strvec& output)
     {
         REQUIRE(output == strvec({
-            "YOU ARE IN ROOM 1",
-            "TUNNELS LEAD TO 2 3 4",
+            Msg::YouAreInRoom + "1",
+            Msg::TunnelsLeadTo + "2 3 4",
             "",
-            ShootOrMove
+            Msg::ShootOrMove
         }));
     }
 }
@@ -85,28 +81,28 @@ TEST_CASE("CommandInterpreter")
         {
             strvec output = interpreter.Input("");
             REQUIRE(commands.invoked.empty());
-            REQUIRE(output == strvec({ ShootOrMove }));
+            REQUIRE(output == strvec({ Msg::ShootOrMove }));
         }
 
         SECTION("Unrecognized input")
         {
             strvec output = interpreter.Input("X");
             REQUIRE(commands.invoked.empty());
-            REQUIRE(output == strvec({ UnrecognizedInput, ShootOrMove }));
+            REQUIRE(output == strvec({ Msg::Huh, Msg::ShootOrMove }));
         }
 
         SECTION("M input")
         {
             strvec output = interpreter.Input("M");
             REQUIRE(commands.invoked.empty());
-            REQUIRE(output == strvec({ WhereTo }));
+            REQUIRE(output == strvec({ Msg::WhereTo }));
         }
 
         SECTION("m input")
         {
             strvec output = interpreter.Input("M");
             REQUIRE(commands.invoked.empty());
-            REQUIRE(output == strvec({ WhereTo }));
+            REQUIRE(output == strvec({ Msg::WhereTo }));
         }
     }
 
@@ -119,14 +115,14 @@ TEST_CASE("CommandInterpreter")
         {
             strvec output = interpreter.Input("");
             REQUIRE(commands.invoked.empty());
-            REQUIRE(output == strvec({ WhereTo }));
+            REQUIRE(output == strvec({ Msg::WhereTo }));
         }
 
         SECTION("Unparsable input")
         {
             strvec output = interpreter.Input("X");
             REQUIRE(commands.invoked.empty());
-            REQUIRE(output == strvec({ UnrecognizedInput, WhereTo }));
+            REQUIRE(output == strvec({ Msg::Huh, Msg::WhereTo }));
         }
 
         SECTION("Room-number input")
@@ -141,7 +137,7 @@ TEST_CASE("CommandInterpreter")
             commands.WillThrowNoSuchRoomException();
             strvec output = interpreter.Input("21");
             REQUIRE(commands.invoked.empty());
-            REQUIRE(output == strvec({ Impossible, WhereTo }));
+            REQUIRE(output == strvec({ Msg::Impossible, Msg::WhereTo }));
         }
 
         SECTION("Room-number input, unconnected room")
@@ -149,7 +145,7 @@ TEST_CASE("CommandInterpreter")
             commands.WillThrowRoomsNotConnectedException();
             strvec output = interpreter.Input("5");
             REQUIRE(commands.invoked.empty());
-            REQUIRE(output == strvec({ Impossible, WhereTo }));
+            REQUIRE(output == strvec({ Msg::Impossible, Msg::WhereTo }));
         }
     }
 }

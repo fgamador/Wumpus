@@ -82,6 +82,7 @@
     <ClInclude Include="GameException.h" />
     <ClInclude Include="GameMap.h" />
     <ClInclude Include="GameModel.h" />
+    <ClInclude Include="Msg.h" />
     <ClInclude Include="NoSuchRoomException.h" />
     <ClInclude Include="PlayerState.h" />
     <ClInclude Include="RoomsNotConnectedException.h" />

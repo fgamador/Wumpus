@@ -1,6 +1,7 @@
 #include "catch.hpp"
 
 #include "CommandInterpreter.h"
+#include "Msg.h"
 
 TEST_CASE("In room 2")
 {
@@ -13,10 +14,10 @@ TEST_CASE("In room 2")
         // TODO need method other than Input("") for this?
         auto output = interpreter.Input("");
         REQUIRE(output == strvec({
-            "YOU ARE IN ROOM 2",
-            "TUNNELS LEAD TO 1 3 10",
+            Msg::YouAreInRoom + "2",
+            Msg::TunnelsLeadTo + "1 3 10",
             "",
-            "SHOOT OR MOVE (S-M)? "
+            Msg::ShootOrMove
         }));
     }
 
@@ -25,15 +26,15 @@ TEST_CASE("In room 2")
         interpreter.Input("");
         auto output = interpreter.Input("M");
         REQUIRE(output == strvec({
-            "WHERE TO? "
+            Msg::WhereTo
         }));
 
         output = interpreter.Input("10");
         REQUIRE(output == strvec({
-            "YOU ARE IN ROOM 10",
-            "TUNNELS LEAD TO 2 9 11",
+            Msg::YouAreInRoom + "10",
+            Msg::TunnelsLeadTo + "2 9 11",
             "",
-            "SHOOT OR MOVE (S-M)? "
+            Msg::ShootOrMove
         }));
     }
 }

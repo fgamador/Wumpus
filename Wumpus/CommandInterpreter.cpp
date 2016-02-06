@@ -2,6 +2,8 @@
 
 #include <sstream>
 
+#include "Msg.h"
+
 class CommandInterpreter::State
 {
 public:
@@ -75,14 +77,14 @@ void CommandInterpreter::AwaitingCommandState::Input(string input, CommandInterp
     }
     else
     {
-        interp.Output("HUH?");
+        interp.Output(Msg::Huh);
         OutputStandardMessage(interp);
     }
 }
 
 void CommandInterpreter::AwaitingCommandState::OutputStandardMessage(CommandInterpreter& interp) const
 {
-    interp.Output("SHOOT OR MOVE (S-M)? ");
+    interp.Output(Msg::ShootOrMove);
 }
 
 void CommandInterpreter::AwaitingMoveRoomState::Input(string input, CommandInterpreter& interp) const
@@ -99,13 +101,13 @@ void CommandInterpreter::AwaitingMoveRoomState::Input(string input, CommandInter
     }
     catch (const exception&)
     {
-        interp.Output("HUH?");
+        interp.Output(Msg::Huh);
         OutputStandardMessage(interp);
         return;
     }
     catch (const GameException&)
     {
-        interp.Output("IMPOSSIBLE");
+        interp.Output(Msg::Impossible);
         OutputStandardMessage(interp);
         return;
     }
@@ -116,18 +118,18 @@ void CommandInterpreter::AwaitingMoveRoomState::Input(string input, CommandInter
 
 void CommandInterpreter::AwaitingMoveRoomState::OutputStandardMessage(CommandInterpreter& interp) const
 {
-    interp.Output("WHERE TO? ");
+    interp.Output(Msg::WhereTo);
 }
 
 void CommandInterpreter::OutputPlayerState()
 {
     ostringstream out1;
-    out1 << "YOU ARE IN ROOM " << m_playerState.GetPlayerRoom();
+    out1 << Msg::YouAreInRoom << m_playerState.GetPlayerRoom();
     Output(out1.str());
 
     ints3 connected = m_playerState.GetPlayerConnectedRooms();
     ostringstream out2;
-    out2 << "TUNNELS LEAD TO " << connected[0] << " " << connected[1] << " " << connected[2];
+    out2 << Msg::TunnelsLeadTo << connected[0] << " " << connected[1] << " " << connected[2];
     Output(out2.str());
 }
 
