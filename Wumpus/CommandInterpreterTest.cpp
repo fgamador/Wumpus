@@ -1,5 +1,7 @@
 #include "catch.hpp"
 
+#include <sstream>
+
 #include "CommandInterpreter.h"
 #include "GameCommands.h"
 #include "Msg.h"
@@ -147,5 +149,23 @@ TEST_CASE("CommandInterpreter")
             REQUIRE(commands.invoked.empty());
             REQUIRE(output == strvec({ Msg::Impossible, Msg::WhereTo }));
         }
+    }
+
+    SECTION("Stream I/O")
+    {
+        ostringstream input;
+        input << "M" << endl;
+        ostringstream out;
+
+        interpreter.Run(istringstream(input.str()), out);
+
+        ostringstream expected;
+        expected
+            << Msg::YouAreInRoom << "1" << endl
+            << Msg::TunnelsLeadTo << "2 3 4" << endl
+            << endl
+            << Msg::ShootOrMove
+            << Msg::WhereTo;
+        REQUIRE(out.str() == expected.str());
     }
 }

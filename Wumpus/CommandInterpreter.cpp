@@ -43,6 +43,22 @@ CommandInterpreter::CommandInterpreter(GameCommands& commands, const PlayerState
 {
 }
 
+void CommandInterpreter::Run(istream& in, ostream& out)
+{
+    string input;
+    while (!in.eof())
+    {
+        strvec output = Input(input);
+        for (size_t i = 0; i < output.size(); ++i)
+        {
+            if (i > 0)
+                out << endl;
+            out << output[i];
+        }
+        getline(in, input);
+    }
+}
+
 strvec CommandInterpreter::Input(string input)
 {
     m_output.clear();

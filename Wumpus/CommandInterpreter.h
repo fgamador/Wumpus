@@ -1,7 +1,8 @@
 #pragma once
 
-#include <vector>
+#include <iostream>
 #include <string>
+#include <vector>
 #include "GameModel.h"
 
 using namespace std;
@@ -13,6 +14,7 @@ class CommandInterpreter
 public:
     CommandInterpreter(GameCommands& commands, const PlayerState& playerState);
 
+    void Run(istream& in, ostream& out);
     strvec Input(string input);
 
 private:

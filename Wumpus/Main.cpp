@@ -19,18 +19,7 @@ int RunGame()
     // TODO model.RandomInit();
     model.SetPlayerRoom(1);
 
-    string input;
-    for (;;)
-    {
-        strvec output = interp.Input(input);
-        for (size_t i = 0; i < output.size(); ++i)
-        {
-            if (i > 0)
-                cout << endl;
-            cout << output[i];
-        }
-        getline(cin, input);
-    }
+    interp.Run(cin, cout);
 
     return 0;
 }
