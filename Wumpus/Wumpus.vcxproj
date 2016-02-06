@@ -77,6 +77,24 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="catch.hpp" />
+    <ClInclude Include="CommandInterpreter.h" />
+    <ClInclude Include="GameCommands.h" />
+    <ClInclude Include="GameException.h" />
+    <ClInclude Include="GameMap.h" />
+    <ClInclude Include="GameModel.h" />
+    <ClInclude Include="NoSuchRoomException.h" />
+    <ClInclude Include="PlayerState.h" />
+    <ClInclude Include="RoomsNotConnectedException.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="CommandInterpreter.cpp" />
+    <ClCompile Include="CommandInterpreterTest.cpp" />
+    <ClCompile Include="GameMap.cpp" />
+    <ClCompile Include="GameMapTest.cpp" />
+    <ClCompile Include="GameModel.cpp" />
+    <ClCompile Include="GameModelTest.cpp" />
+    <ClCompile Include="GameScenariosTest.cpp" />
+    <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
