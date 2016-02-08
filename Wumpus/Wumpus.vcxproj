@@ -82,9 +82,12 @@
     <ClInclude Include="GameException.h" />
     <ClInclude Include="GameMap.h" />
     <ClInclude Include="GameModel.h" />
+    <ClInclude Include="IRandomSource.h" />
     <ClInclude Include="Msg.h" />
     <ClInclude Include="NoSuchRoomException.h" />
     <ClInclude Include="PlayerState.h" />
+    <ClInclude Include="RandomSource.h" />
+    <ClInclude Include="RandomSourceStub.h" />
     <ClInclude Include="RoomsNotConnectedException.h" />
   </ItemGroup>
   <ItemGroup>
@@ -96,6 +99,8 @@
     <ClCompile Include="GameModelTest.cpp" />
     <ClCompile Include="GameScenariosTest.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="RandomSource.cpp" />
+    <ClCompile Include="RandomSourceTest.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

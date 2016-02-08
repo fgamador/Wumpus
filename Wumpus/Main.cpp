@@ -5,6 +5,7 @@
 
 #include "CommandInterpreter.h"
 #include "GameModel.h"
+#include "RandomSource.h"
 
 int RunTests()
 {
@@ -13,14 +14,12 @@ int RunTests()
 
 int RunGame()
 {
-    GameModel model;
+    RandomSource randomSource;
+    GameModel model(randomSource);
     CommandInterpreter interp(model, model);
 
-    // TODO model.RandomInit();
-    model.SetPlayerRoom(1);
-
+    model.RandomInit();
     interp.Run(cin, cout);
-
     return 0;
 }
 

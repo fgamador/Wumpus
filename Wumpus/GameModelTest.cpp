@@ -1,43 +1,55 @@
 #include "catch.hpp"
 
 #include "GameModel.h"
+#include "RandomSourceStub.h"
 
-TEST_CASE("GameModel::SetPlayerRoom")
+TEST_CASE("GameModel")
 {
-    GameModel model;
+    RandomSourceStub randomSource;
+    GameModel model(randomSource);
 
-    SECTION("To valid room")
+    SECTION("Random init")
     {
-        model.SetPlayerRoom(2);
+        randomSource.SetNextInt(2);
+        // TODO stub random somehow
+        model.RandomInit();
         REQUIRE(model.GetPlayerRoom() == 2);
     }
 
-    SECTION("To non-existent room")
+    SECTION("SetPlayerRoom")
     {
-        REQUIRE_THROWS_AS(model.SetPlayerRoom(0), NoSuchRoomException);
-        REQUIRE_THROWS_AS(model.SetPlayerRoom(21), NoSuchRoomException);
-    }
-}
+        SECTION("To valid room")
+        {
+            model.SetPlayerRoom(2);
+            REQUIRE(model.GetPlayerRoom() == 2);
+        }
 
-TEST_CASE("GameModel::MovePlayer")
-{
-    GameModel model;
-    model.SetPlayerRoom(2);
-
-    SECTION("To connected room")
-    {
-        model.MovePlayer(10);
-        REQUIRE(model.GetPlayerRoom() == 10);
+        SECTION("To non-existent room")
+        {
+            REQUIRE_THROWS_AS(model.SetPlayerRoom(0), NoSuchRoomException);
+            REQUIRE_THROWS_AS(model.SetPlayerRoom(21), NoSuchRoomException);
+        }
     }
 
-    SECTION("To unconnected room")
+    SECTION("MovePlayer")
     {
-        REQUIRE_THROWS_AS(model.MovePlayer(5), RoomsNotConnectedException);
-    }
+        model.SetPlayerRoom(2);
 
-    SECTION("To non-existent room")
-    {
-        REQUIRE_THROWS_AS(model.MovePlayer(0), NoSuchRoomException);
-        REQUIRE_THROWS_AS(model.MovePlayer(21), NoSuchRoomException);
+        SECTION("To connected room")
+        {
+            model.MovePlayer(10);
+            REQUIRE(model.GetPlayerRoom() == 10);
+        }
+
+        SECTION("To unconnected room")
+        {
+            REQUIRE_THROWS_AS(model.MovePlayer(5), RoomsNotConnectedException);
+        }
+
+        SECTION("To non-existent room")
+        {
+            REQUIRE_THROWS_AS(model.MovePlayer(0), NoSuchRoomException);
+            REQUIRE_THROWS_AS(model.MovePlayer(21), NoSuchRoomException);
+        }
     }
 }

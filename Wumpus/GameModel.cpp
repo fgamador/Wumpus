@@ -1,5 +1,15 @@
 #include "GameModel.h"
 
+GameModel::GameModel(IRandomSource& randomSource)
+    : m_randomSource(&randomSource)
+{
+}
+
+void GameModel::RandomInit()
+{
+    m_playerRoom = m_randomSource->NextInt(1, 20);
+}
+
 void GameModel::SetPlayerRoom(int room)
 {
     if (room < 1 || room > 20)

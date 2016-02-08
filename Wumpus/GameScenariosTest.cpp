@@ -2,10 +2,12 @@
 
 #include "CommandInterpreter.h"
 #include "Msg.h"
+#include "RandomSourceStub.h"
 
 TEST_CASE("In room 2")
 {
-    GameModel model;
+    RandomSourceStub randomSource;
+    GameModel model(randomSource);
     CommandInterpreter interpreter(model, model);
     model.SetPlayerRoom(2);
 
