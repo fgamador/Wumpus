@@ -13,7 +13,7 @@ public:
     GameMap();
 
     ints3 GetConnectedRooms(int room) const;
-    bool AreConnected(int room1, int room2);
+    bool AreConnected(int room1, int room2) const;
 
 private:
     // Room numbers are one-based. We leave the zero row empty.

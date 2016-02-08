@@ -32,7 +32,7 @@ ints3 GameMap::GetConnectedRooms(int room) const
     return m_connections[room];
 }
 
-bool GameMap::AreConnected(int room1, int room2)
+bool GameMap::AreConnected(int room1, int room2) const
 {
     ints3 connectedRooms = m_connections[room1];
     return find(connectedRooms.begin(), connectedRooms.end(), room2) != connectedRooms.end();

@@ -139,6 +139,9 @@ void CommandInterpreter::AwaitingMoveRoomState::OutputStandardMessage(CommandInt
 
 void CommandInterpreter::OutputPlayerState()
 {
+    if (m_playerState.WumpusAdjacent())
+        Output(Msg::SmellWumpus);
+
     ostringstream out1;
     out1 << Msg::YouAreInRoom << m_playerState.GetPlayerRoom();
     Output(out1.str());

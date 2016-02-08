@@ -1,20 +1,27 @@
 #pragma once
 
 #include "IRandomSource.h"
+#include <vector>
+
+using namespace std;
+
+typedef vector<int> intvec;
 
 class RandomSourceStub : public IRandomSource
 {
 public:
     int NextInt(int from, int to) override
     {
-        return m_nextInt;
+        return *(m_nextInt++);
     }
 
-    void SetNextInt(int val)
+    void SetNextInts(intvec nextInts)
     {
-        m_nextInt = val;
+        m_nextInts = nextInts;
+        m_nextInt = m_nextInts.begin();
     }
 
 private:
-    int m_nextInt;
+    intvec m_nextInts;
+    intvec::iterator m_nextInt;
 };

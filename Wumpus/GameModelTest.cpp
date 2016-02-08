@@ -10,10 +10,10 @@ TEST_CASE("GameModel")
 
     SECTION("Random init")
     {
-        randomSource.SetNextInt(2);
-        // TODO stub random somehow
+        randomSource.SetNextInts({ 2, 11 });
         model.RandomInit();
         REQUIRE(model.GetPlayerRoom() == 2);
+        REQUIRE(model.GetWumpusRoom() == 11);
     }
 
     SECTION("SetPlayerRoom")
@@ -28,6 +28,23 @@ TEST_CASE("GameModel")
         {
             REQUIRE_THROWS_AS(model.SetPlayerRoom(0), NoSuchRoomException);
             REQUIRE_THROWS_AS(model.SetPlayerRoom(21), NoSuchRoomException);
+        }
+    }
+
+    SECTION("WumpusAdjacent")
+    {
+        SECTION("Adjacent")
+        {
+            model.SetPlayerRoom(2);
+            model.SetWumpusRoom(10);
+            REQUIRE(model.WumpusAdjacent());
+        }
+
+        SECTION("Not adjacent")
+        {
+            model.SetPlayerRoom(2);
+            model.SetWumpusRoom(11);
+            REQUIRE(!model.WumpusAdjacent());
         }
     }
 

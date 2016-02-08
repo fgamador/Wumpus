@@ -19,6 +19,6 @@ TEST_CASE("RandomSource")
     }
     for (int i = 0; i < 3; i++)
     {
-        REQUIRE(counts[i] == Approx(333).epsilon(0.1));
+        REQUIRE(counts[i] == Approx(333).epsilon(0.2));
     }
 }

@@ -8,6 +8,7 @@ GameModel::GameModel(IRandomSource& randomSource)
 void GameModel::RandomInit()
 {
     m_playerRoom = m_randomSource->NextInt(1, 20);
+    m_wumpusRoom = m_randomSource->NextInt(1, 20);
 }
 
 void GameModel::SetPlayerRoom(int room)
@@ -16,6 +17,14 @@ void GameModel::SetPlayerRoom(int room)
         throw NoSuchRoomException();
 
     m_playerRoom = room;
+}
+
+void GameModel::SetWumpusRoom(int room)
+{
+    if (room < 1 || room > 20)
+        throw NoSuchRoomException();
+
+    m_wumpusRoom = room;
 }
 
 void GameModel::MovePlayer(int room)
@@ -37,4 +46,14 @@ int GameModel::GetPlayerRoom() const
 ints3 GameModel::GetPlayerConnectedRooms() const
 {
     return m_map.GetConnectedRooms(m_playerRoom);
+}
+
+bool GameModel::WumpusAdjacent() const
+{
+    return m_map.AreConnected(m_playerRoom, m_wumpusRoom);
+}
+
+int GameModel::GetWumpusRoom() const
+{
+    return m_wumpusRoom;
 }

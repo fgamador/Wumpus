@@ -61,18 +61,35 @@ public:
     {
         return{ 2, 3, 4 };
     }
+
+    bool WumpusAdjacent() const
+    {
+        return wumpusAdjacent;
+    }
+
+    bool wumpusAdjacent = false;
 };
 
 TEST_CASE("CommandInterpreter")
 {
     GameCommandsSpy commands;
-    CommandInterpreter interp(commands, PlayerStateStub());
+    PlayerStateStub playerState;
+    CommandInterpreter interp(commands, playerState);
 
     SECTION("Initial state")
     {
         auto output = interp.Input("");
         REQUIRE(commands.invoked.empty());
         RequireInitialMsg(output);
+    }
+
+    SECTION("Initial state, wumpus adjacent")
+    {
+        playerState.wumpusAdjacent = true;
+        auto output = interp.Input("");
+        REQUIRE(commands.invoked.empty());
+        REQUIRE(output[0] == Msg::SmellWumpus);
+        RequireInitialMsg(strvec(output.begin() + 1, output.end()));
     }
 
     SECTION("Awaiting command")
