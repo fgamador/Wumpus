@@ -27,7 +27,7 @@ void GameModel::SetWumpusRoom(int room)
     m_wumpusRoom = room;
 }
 
-void GameModel::MovePlayer(int room)
+set<Event> GameModel::MovePlayer(int room)
 {
     if (room < 1 || room > 20)
         throw NoSuchRoomException();
@@ -36,6 +36,19 @@ void GameModel::MovePlayer(int room)
         throw RoomsNotConnectedException();
 
     m_playerRoom = room;
+
+    if (m_playerRoom == m_wumpusRoom)
+    {
+        m_playerAlive = false;
+        return{ Event::EatenByWumpus };
+    }
+
+    return {};
+}
+
+bool GameModel::PlayerAlive() const
+{
+    return m_playerAlive;
 }
 
 int GameModel::GetPlayerRoom() const

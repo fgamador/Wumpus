@@ -54,8 +54,10 @@ TEST_CASE("GameModel")
 
         SECTION("To connected room")
         {
-            model.MovePlayer(10);
+            set<Event> events = model.MovePlayer(10);
+            REQUIRE(events.empty());
             REQUIRE(model.GetPlayerRoom() == 10);
+            REQUIRE(model.PlayerAlive());
         }
 
         SECTION("To unconnected room")
@@ -67,6 +69,15 @@ TEST_CASE("GameModel")
         {
             REQUIRE_THROWS_AS(model.MovePlayer(0), NoSuchRoomException);
             REQUIRE_THROWS_AS(model.MovePlayer(21), NoSuchRoomException);
+        }
+
+        SECTION("To Wumpus room")
+        {
+            model.SetWumpusRoom(10);
+            set<Event> events = model.MovePlayer(10);
+            REQUIRE(events.size() == 1);
+            REQUIRE(events.count(Event::EatenByWumpus) == 1);
+            REQUIRE(!model.PlayerAlive());
         }
     }
 }

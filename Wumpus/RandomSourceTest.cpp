@@ -6,7 +6,7 @@
 
 using namespace std;
 
-TEST_CASE("RandomSource")
+TEST_CASE("RandomSource", "[.]")
 {
     RandomSource randomSource;
     array<int, 3> counts = { 0, 0, 0 };

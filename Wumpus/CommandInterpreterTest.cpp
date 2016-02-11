@@ -32,7 +32,7 @@ public:
         m_willThrowRoomsNotConnectedException = true;
     }
 
-    void MovePlayer(int room) override
+    set<Event> MovePlayer(int room) override
     {
         if (m_willThrowNoSuchRoomException)
             throw NoSuchRoomException();
@@ -40,6 +40,7 @@ public:
             throw RoomsNotConnectedException();
 
         invoked.push_back("MovePlayer " + to_string(room));
+        return {};
     }
 
     strvec invoked;
@@ -52,6 +53,11 @@ private:
 class PlayerStateStub : public PlayerState
 {
 public:
+    bool PlayerAlive() const
+    {
+        return true;
+    }
+
     int GetPlayerRoom() const
     {
         return 1;

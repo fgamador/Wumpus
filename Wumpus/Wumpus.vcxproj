@@ -78,6 +78,7 @@
   <ItemGroup>
     <ClInclude Include="catch.hpp" />
     <ClInclude Include="CommandInterpreter.h" />
+    <ClInclude Include="Event.h" />
     <ClInclude Include="GameCommands.h" />
     <ClInclude Include="GameException.h" />
     <ClInclude Include="GameMap.h" />
