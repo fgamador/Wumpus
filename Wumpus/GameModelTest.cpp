@@ -31,6 +31,31 @@ TEST_CASE("GameModel")
         }
     }
 
+    SECTION("Start over")
+    {
+        randomSource.SetNextInts({ 2, 11 });
+        model.RandomInit();
+        randomSource.SetNextInts({ 9, 3 });
+
+        SECTION("Replay")
+        {
+            model.MovePlayer(10);
+            //model.MoveWumpus(19);
+            model.Replay();
+            REQUIRE(model.GetPlayerRoom() == 2);
+            //REQUIRE(model.GetWumpusRoom() == 11);
+        }
+
+        SECTION("Restart")
+        {
+            model.MovePlayer(10);
+            //model.MoveWumpus(19);
+            model.Restart();
+            REQUIRE(model.GetPlayerRoom() == 9);
+            //REQUIRE(model.GetWumpusRoom() == 3);
+        }
+    }
+
     SECTION("WumpusAdjacent")
     {
         SECTION("Adjacent")
@@ -75,9 +100,18 @@ TEST_CASE("GameModel")
         {
             model.SetWumpusRoom(10);
             set<Event> events = model.MovePlayer(10);
-            REQUIRE(events.size() == 1);
-            REQUIRE(events.count(Event::EatenByWumpus) == 1);
-            REQUIRE(!model.PlayerAlive());
+
+            SECTION("Eaten by Wumpus")
+            {
+                REQUIRE(events.size() == 1);
+                REQUIRE(events.count(Event::EatenByWumpus) == 1);
+                REQUIRE(!model.PlayerAlive());
+            }
+
+            SECTION("No move after death")
+            {
+                REQUIRE_THROWS_AS(model.MovePlayer(2), PlayerDeadException);
+            }
         }
     }
 }

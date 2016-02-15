@@ -22,6 +22,7 @@ private:
     class InitialState;
     class AwaitingCommandState;
     class AwaitingMoveRoomState;
+    class AwaitingReplayState;
 
 private:
     void OutputPlayerState();
@@ -37,4 +38,5 @@ private:
     static InitialState Initial;
     static AwaitingCommandState AwaitingCommand;
     static AwaitingMoveRoomState AwaitingMoveRoom;
+    static AwaitingReplayState AwaitingReplay;
 };

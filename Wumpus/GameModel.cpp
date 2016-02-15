@@ -7,8 +7,9 @@ GameModel::GameModel(IRandomSource& randomSource)
 
 void GameModel::RandomInit()
 {
-    m_playerRoom = m_randomSource->NextInt(1, 20);
+    m_playerRoom = m_initialPlayerRoom = m_randomSource->NextInt(1, 20);
     m_wumpusRoom = m_randomSource->NextInt(1, 20);
+    // TODO check for initial events?
 }
 
 void GameModel::SetPlayerRoom(int room)
@@ -29,6 +30,9 @@ void GameModel::SetWumpusRoom(int room)
 
 set<Event> GameModel::MovePlayer(int room)
 {
+    if (!m_playerAlive)
+        throw PlayerDeadException();
+
     if (room < 1 || room > 20)
         throw NoSuchRoomException();
 
@@ -44,6 +48,21 @@ set<Event> GameModel::MovePlayer(int room)
     }
 
     return {};
+}
+
+set<Event> GameModel::Replay()
+{
+    m_playerRoom = m_initialPlayerRoom;
+    // TODO restore wumpus
+    // TODO check for initial events
+    return {};
+}
+
+set<Event> GameModel::Restart()
+{
+    RandomInit();
+    // TODO check for initial events
+    return{};
 }
 
 bool GameModel::PlayerAlive() const

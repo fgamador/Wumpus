@@ -22,32 +22,36 @@ namespace {
 class GameCommandsSpy : public GameCommands
 {
 public:
-    void WillThrowNoSuchRoomException()
-    {
-        m_willThrowNoSuchRoomException = true;
-    }
-
-    void WillThrowRoomsNotConnectedException()
-    {
-        m_willThrowRoomsNotConnectedException = true;
-    }
-
     set<Event> MovePlayer(int room) override
     {
-        if (m_willThrowNoSuchRoomException)
+        if (willThrowNoSuchRoomException)
             throw NoSuchRoomException();
-        if (m_willThrowRoomsNotConnectedException)
+        if (willThrowPlayerDeadException)
+            throw PlayerDeadException();
+        if (willThrowRoomsNotConnectedException)
             throw RoomsNotConnectedException();
 
         invoked.push_back("MovePlayer " + to_string(room));
-        return {};
+        return moveEvents;
+    }
+
+    set<Event> Replay() override
+    {
+        invoked.push_back("Replay");
+        return{};
+    }
+
+    set<Event> Restart() override
+    {
+        invoked.push_back("Restart");
+        return{};
     }
 
     strvec invoked;
-
-private:
-    bool m_willThrowNoSuchRoomException = false;
-    bool m_willThrowRoomsNotConnectedException = false;
+    bool willThrowNoSuchRoomException = false;
+    bool willThrowPlayerDeadException = false;
+    bool willThrowRoomsNotConnectedException = false;
+    set<Event> moveEvents = {};
 };
 
 class PlayerStateStub : public PlayerState
@@ -55,7 +59,7 @@ class PlayerStateStub : public PlayerState
 public:
     bool PlayerAlive() const
     {
-        return true;
+        return playerAlive;
     }
 
     int GetPlayerRoom() const
@@ -73,6 +77,7 @@ public:
         return wumpusAdjacent;
     }
 
+    bool playerAlive = true;
     bool wumpusAdjacent = false;
 };
 
@@ -159,7 +164,7 @@ TEST_CASE("CommandInterpreter")
 
         SECTION("Room-number input, no such room")
         {
-            commands.WillThrowNoSuchRoomException();
+            commands.willThrowNoSuchRoomException = true;
             strvec output = interp.Input("21");
             REQUIRE(commands.invoked.empty());
             REQUIRE(output == strvec({ Msg::Impossible, Msg::WhereTo }));
@@ -167,10 +172,58 @@ TEST_CASE("CommandInterpreter")
 
         SECTION("Room-number input, unconnected room")
         {
-            commands.WillThrowRoomsNotConnectedException();
+            commands.willThrowRoomsNotConnectedException = true;
             strvec output = interp.Input("5");
             REQUIRE(commands.invoked.empty());
             REQUIRE(output == strvec({ Msg::Impossible, Msg::WhereTo }));
+        }
+
+        SECTION("Eaten by Wumpus")
+        {
+            commands.moveEvents = { Event::EatenByWumpus };
+            playerState.playerAlive = false;
+            strvec output = interp.Input("2");
+            REQUIRE(commands.invoked == strvec({ "MovePlayer 2" }));
+            REQUIRE(output == strvec({ Msg::WumpusGotYou, Msg::YouLose, Msg::SameSetup }));
+        }
+    }
+
+    SECTION("Awaiting replay")
+    {
+        interp.Input("");
+        interp.Input("M");
+        playerState.playerAlive = false;
+        interp.Input("2");
+        commands.invoked.clear();
+
+        SECTION("Empty input")
+        {
+            strvec output = interp.Input("");
+            REQUIRE(commands.invoked.empty());
+            REQUIRE(output == strvec({ Msg::SameSetup }));
+        }
+
+        SECTION("Unrecognized input")
+        {
+            strvec output = interp.Input("X");
+            REQUIRE(commands.invoked.empty());
+            REQUIRE(output == strvec({ Msg::Huh, Msg::SameSetup }));
+        }
+
+        SECTION("Y input")
+        {
+            strvec output = interp.Input("Y");
+            REQUIRE(commands.invoked == strvec({ "Replay" }));
+            REQUIRE(output[0] == Msg::HuntTheWumpus);
+            RequireInitialMsg(strvec(output.begin() + 1, output.end()));
+        }
+
+        SECTION("N input")
+        {
+            strvec output = interp.Input("N");
+            REQUIRE(commands.invoked == strvec({ "Restart" }));
+            REQUIRE(output[0] == Msg::HuntTheWumpus);
+            RequireInitialMsg(strvec(output.begin() + 1, output.end()));
         }
     }
 

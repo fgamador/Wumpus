@@ -32,9 +32,17 @@ public:
     void OutputStandardMessage(CommandInterpreter& interp) const override;
 };
 
+class CommandInterpreter::AwaitingReplayState : public State
+{
+public:
+    void Input(string input, CommandInterpreter& interp) const override;
+    void OutputStandardMessage(CommandInterpreter& interp) const override;
+};
+
 CommandInterpreter::InitialState CommandInterpreter::Initial;
 CommandInterpreter::AwaitingCommandState CommandInterpreter::AwaitingCommand;
 CommandInterpreter::AwaitingMoveRoomState CommandInterpreter::AwaitingMoveRoom;
+CommandInterpreter::AwaitingReplayState CommandInterpreter::AwaitingReplay;
 
 CommandInterpreter::CommandInterpreter(GameCommands& commands, const PlayerState& playerState)
     : m_commands(commands)
@@ -113,7 +121,11 @@ void CommandInterpreter::AwaitingMoveRoomState::Input(string input, CommandInter
 
     try
     {
-        interp.m_commands.MovePlayer(stoi(input));
+        set<Event> events = interp.m_commands.MovePlayer(stoi(input));
+        if (events.count(Event::EatenByWumpus) != 0)
+        {
+            interp.Output(Msg::WumpusGotYou);
+        }
     }
     catch (const exception&)
     {
@@ -128,13 +140,53 @@ void CommandInterpreter::AwaitingMoveRoomState::Input(string input, CommandInter
         return;
     }
 
-    Initial.OutputStandardMessage(interp);
-    interp.SetState(AwaitingCommand);
+    if (interp.m_playerState.PlayerAlive())
+    {
+        Initial.OutputStandardMessage(interp);
+        interp.SetState(AwaitingCommand);
+    }
+    else
+    {
+        interp.Output(Msg::YouLose);
+        interp.SetState(AwaitingReplay);
+    }
 }
 
 void CommandInterpreter::AwaitingMoveRoomState::OutputStandardMessage(CommandInterpreter& interp) const
 {
     interp.Output(Msg::WhereTo);
+}
+
+void CommandInterpreter::AwaitingReplayState::Input(string input, CommandInterpreter& interp) const
+{
+    if (input == "")
+    {
+        OutputStandardMessage(interp);
+    }
+    else if (input == "Y" || input == "y")
+    {
+        interp.m_commands.Replay();
+        interp.Output(Msg::HuntTheWumpus);
+        Initial.OutputStandardMessage(interp);
+        interp.SetState(AwaitingCommand);
+    }
+    else if (input == "N" || input == "n")
+    {
+        interp.m_commands.Restart();
+        interp.Output(Msg::HuntTheWumpus);
+        Initial.OutputStandardMessage(interp);
+        interp.SetState(AwaitingCommand);
+    }
+    else
+    {
+        interp.Output(Msg::Huh);
+        OutputStandardMessage(interp);
+    }
+}
+
+void CommandInterpreter::AwaitingReplayState::OutputStandardMessage(CommandInterpreter& interp) const
+{
+    interp.Output(Msg::SameSetup);
 }
 
 void CommandInterpreter::OutputPlayerState()
