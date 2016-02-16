@@ -103,10 +103,18 @@ TEST_CASE("GameModel")
 
             SECTION("Eaten by Wumpus")
             {
-                REQUIRE(events.size() == 1);
+                REQUIRE(events.size() == 2);
+                REQUIRE(events.count(Event::BumpedWumpus) == 1);
                 REQUIRE(events.count(Event::EatenByWumpus) == 1);
                 REQUIRE(!model.PlayerAlive());
             }
+
+            //SECTION("Wumpus moves")
+            //{
+            //    REQUIRE(events.size() == 1);
+            //    REQUIRE(events.count(Event::EatenByWumpus) == 1);
+            //    REQUIRE(!model.PlayerAlive());
+            //}
 
             SECTION("No move after death")
             {

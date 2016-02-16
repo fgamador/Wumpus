@@ -2,5 +2,8 @@
 
 enum class Event
 {
-    EatenByWumpus
+    BatSnatch,
+    BumpedWumpus,
+    EatenByWumpus,
+    FellInPit
 };

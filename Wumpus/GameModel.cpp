@@ -44,7 +44,7 @@ set<Event> GameModel::MovePlayer(int room)
     if (m_playerRoom == m_wumpusRoom)
     {
         m_playerAlive = false;
-        return{ Event::EatenByWumpus };
+        return{ Event::BumpedWumpus, Event::EatenByWumpus };
     }
 
     return {};
