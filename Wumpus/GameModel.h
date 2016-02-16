@@ -16,9 +16,9 @@ public:
     void RandomInit();
     void SetPlayerRoom(int room);
     void SetWumpusRoom(int room);
-    set<Event> MovePlayer(int room) override;
-    set<Event> Replay() override;
-    set<Event> Restart() override;
+    eventvec MovePlayer(int room) override;
+    eventvec Replay() override;
+    eventvec Restart() override;
 
     bool PlayerAlive() const override;
     int GetPlayerRoom() const override;

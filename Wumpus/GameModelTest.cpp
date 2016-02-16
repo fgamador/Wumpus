@@ -79,7 +79,7 @@ TEST_CASE("GameModel")
 
         SECTION("To connected room")
         {
-            set<Event> events = model.MovePlayer(10);
+            eventvec events = model.MovePlayer(10);
             REQUIRE(events.empty());
             REQUIRE(model.GetPlayerRoom() == 10);
             REQUIRE(model.PlayerAlive());
@@ -99,25 +99,31 @@ TEST_CASE("GameModel")
         SECTION("To Wumpus room")
         {
             model.SetWumpusRoom(10);
-            set<Event> events = model.MovePlayer(10);
 
             SECTION("Eaten by Wumpus")
             {
-                REQUIRE(events.size() == 2);
-                REQUIRE(events.count(Event::BumpedWumpus) == 1);
-                REQUIRE(events.count(Event::EatenByWumpus) == 1);
+                randomSource.SetNextInts({ 1 });
+                eventvec events = model.MovePlayer(10);
+                REQUIRE(events == eventvec({
+                    Event::BumpedWumpus, Event::EatenByWumpus
+                }));
                 REQUIRE(!model.PlayerAlive());
             }
 
-            //SECTION("Wumpus moves")
-            //{
-            //    REQUIRE(events.size() == 1);
-            //    REQUIRE(events.count(Event::EatenByWumpus) == 1);
-            //    REQUIRE(!model.PlayerAlive());
-            //}
+            SECTION("Wumpus moves")
+            {
+                randomSource.SetNextInts({ 4 });
+                eventvec events = model.MovePlayer(10);
+                REQUIRE(events == eventvec({
+                    Event::BumpedWumpus
+                }));
+                REQUIRE(model.PlayerAlive());
+            }
 
             SECTION("No move after death")
             {
+                randomSource.SetNextInts({ 1 });
+                model.MovePlayer(10);
                 REQUIRE_THROWS_AS(model.MovePlayer(2), PlayerDeadException);
             }
         }

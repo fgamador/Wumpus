@@ -22,7 +22,7 @@ namespace {
 class GameCommandsSpy : public GameCommands
 {
 public:
-    set<Event> MovePlayer(int room) override
+    eventvec MovePlayer(int room) override
     {
         if (willThrowNoSuchRoomException)
             throw NoSuchRoomException();
@@ -32,26 +32,33 @@ public:
             throw RoomsNotConnectedException();
 
         invoked.push_back("MovePlayer " + to_string(room));
-        return moveEvents;
+        return PostClearEvents();
     }
 
-    set<Event> Replay() override
+    eventvec Replay() override
     {
         invoked.push_back("Replay");
-        return{};
+        return PostClearEvents();
     }
 
-    set<Event> Restart() override
+    eventvec Restart() override
     {
         invoked.push_back("Restart");
-        return{};
+        return PostClearEvents();
+    }
+
+    eventvec PostClearEvents()
+    {
+        eventvec retval = events;
+        events.clear();
+        return retval;
     }
 
     strvec invoked;
     bool willThrowNoSuchRoomException = false;
     bool willThrowPlayerDeadException = false;
     bool willThrowRoomsNotConnectedException = false;
-    set<Event> moveEvents = {};
+    eventvec events = {};
 };
 
 class PlayerStateStub : public PlayerState
@@ -178,13 +185,22 @@ TEST_CASE("CommandInterpreter")
             REQUIRE(output == strvec({ Msg::Impossible, Msg::WhereTo }));
         }
 
-        SECTION("Eaten by Wumpus")
+        SECTION("Bumped Wumpus")
         {
-            commands.moveEvents = { Event::EatenByWumpus };
+            commands.events = { Event::BumpedWumpus };
+            strvec output = interp.Input("2");
+            REQUIRE(commands.invoked == strvec({ "MovePlayer 2" }));
+            REQUIRE(output[0] == Msg::BumpedWumpus);
+            RequireInitialMsg(strvec(output.begin() + 1, output.end()));
+        }
+
+        SECTION("Bumped and eaten by Wumpus")
+        {
+            commands.events = { Event::BumpedWumpus, Event::EatenByWumpus };
             playerState.playerAlive = false;
             strvec output = interp.Input("2");
             REQUIRE(commands.invoked == strvec({ "MovePlayer 2" }));
-            REQUIRE(output == strvec({ Msg::WumpusGotYou, Msg::YouLose, Msg::SameSetup }));
+            REQUIRE(output == strvec({ Msg::BumpedWumpus, Msg::WumpusGotYou, Msg::YouLose, Msg::SameSetup }));
         }
     }
 

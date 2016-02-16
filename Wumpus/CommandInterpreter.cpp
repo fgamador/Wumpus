@@ -9,6 +9,23 @@ class CommandInterpreter::State
 public:
     virtual void Input(string input, CommandInterpreter& interp) const = 0;
     virtual void OutputStandardMessage(CommandInterpreter& interp) const = 0;
+
+protected:
+    void OutputEvents(const eventvec& events, CommandInterpreter& interp) const
+    {
+        for (Event event : events)
+        {
+            switch (event)
+            {
+            case Event::BumpedWumpus:
+                interp.Output(Msg::BumpedWumpus);
+                break;
+            case Event::EatenByWumpus:
+                interp.Output(Msg::WumpusGotYou);
+                break;
+            }
+        }
+    }
 };
 
 class CommandInterpreter::InitialState : public State
@@ -121,11 +138,8 @@ void CommandInterpreter::AwaitingMoveRoomState::Input(string input, CommandInter
 
     try
     {
-        set<Event> events = interp.m_commands.MovePlayer(stoi(input));
-        if (events.count(Event::EatenByWumpus) != 0)
-        {
-            interp.Output(Msg::WumpusGotYou);
-        }
+        eventvec events = interp.m_commands.MovePlayer(stoi(input));
+        OutputEvents(events, interp);
     }
     catch (const exception&)
     {

@@ -28,7 +28,7 @@ void GameModel::SetWumpusRoom(int room)
     m_wumpusRoom = room;
 }
 
-set<Event> GameModel::MovePlayer(int room)
+eventvec GameModel::MovePlayer(int room)
 {
     if (!m_playerAlive)
         throw PlayerDeadException();
@@ -43,6 +43,12 @@ set<Event> GameModel::MovePlayer(int room)
 
     if (m_playerRoom == m_wumpusRoom)
     {
+        if (m_randomSource->NextInt(1, 4) == 4)
+        {
+            m_wumpusRoom = m_map.GetConnectedRooms(m_wumpusRoom)[0]; // TODO random room
+            return{ Event::BumpedWumpus };
+        }
+
         m_playerAlive = false;
         return{ Event::BumpedWumpus, Event::EatenByWumpus };
     }
@@ -50,7 +56,7 @@ set<Event> GameModel::MovePlayer(int room)
     return {};
 }
 
-set<Event> GameModel::Replay()
+eventvec GameModel::Replay()
 {
     m_playerRoom = m_initialPlayerRoom;
     // TODO restore wumpus
@@ -58,7 +64,7 @@ set<Event> GameModel::Replay()
     return {};
 }
 
-set<Event> GameModel::Restart()
+eventvec GameModel::Restart()
 {
     RandomInit();
     // TODO check for initial events
