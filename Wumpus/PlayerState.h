@@ -13,4 +13,5 @@ public:
     virtual int GetPlayerRoom() const = 0;
     virtual ints3 GetPlayerConnectedRooms() const = 0;
     virtual bool WumpusAdjacent() const = 0;
+    virtual bool BatsAdjacent() const = 0;
 };

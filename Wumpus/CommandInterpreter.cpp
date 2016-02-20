@@ -17,6 +17,9 @@ protected:
         {
             switch (event)
             {
+            case Event::BatSnatch:
+                interp.Output(Msg::BatSnatch);
+                break;
             case Event::BumpedWumpus:
                 interp.Output(Msg::BumpedWumpus);
                 break;
@@ -207,6 +210,8 @@ void CommandInterpreter::OutputPlayerState()
 {
     if (m_playerState.WumpusAdjacent())
         Output(Msg::SmellWumpus);
+    if (m_playerState.BatsAdjacent())
+        Output(Msg::BatsNearby);
 
     ostringstream out1;
     out1 << Msg::YouAreInRoom << m_playerState.GetPlayerRoom();

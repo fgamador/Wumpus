@@ -12,7 +12,7 @@ class RandomSourceStub : public IRandomSource
 public:
     int NextInt(int from, int to) override
     {
-        return *(m_nextInt++);
+        return (m_nextInt != m_nextInts.end()) ? *(m_nextInt++) : 20;
     }
 
     void SetNextInts(intvec nextInts)

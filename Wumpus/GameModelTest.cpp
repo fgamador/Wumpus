@@ -10,10 +10,12 @@ TEST_CASE("GameModel")
 
     SECTION("Random init")
     {
-        randomSource.SetNextInts({ 2, 11 });
+        randomSource.SetNextInts({ 2, 11, 5, 16 });
         model.RandomInit();
         REQUIRE(model.GetPlayerRoom() == 2);
         REQUIRE(model.GetWumpusRoom() == 11);
+        REQUIRE(model.GetBatsRoom1() == 5);
+        REQUIRE(model.GetBatsRoom2() == 16);
     }
 
     SECTION("SetPlayerRoom")
@@ -73,6 +75,30 @@ TEST_CASE("GameModel")
         }
     }
 
+    SECTION("BatsAdjacent")
+    {
+        SECTION("Adjacent1")
+        {
+            model.SetPlayerRoom(2);
+            model.SetBatsRooms(10, 19);
+            REQUIRE(model.BatsAdjacent());
+        }
+
+        SECTION("Adjacent2")
+        {
+            model.SetPlayerRoom(2);
+            model.SetBatsRooms(19, 10);
+            REQUIRE(model.BatsAdjacent());
+        }
+
+        SECTION("Not adjacent")
+        {
+            model.SetPlayerRoom(2);
+            model.SetBatsRooms(11, 19);
+            REQUIRE(!model.BatsAdjacent());
+        }
+    }
+
     SECTION("MovePlayer")
     {
         model.SetPlayerRoom(2);
@@ -96,11 +122,11 @@ TEST_CASE("GameModel")
             REQUIRE_THROWS_AS(model.MovePlayer(21), NoSuchRoomException);
         }
 
-        SECTION("To Wumpus room")
+        SECTION("To wumpus room")
         {
             model.SetWumpusRoom(10);
 
-            SECTION("Eaten by Wumpus")
+            SECTION("Eaten by wumpus")
             {
                 randomSource.SetNextInts({ 1 });
                 eventvec events = model.MovePlayer(10);
@@ -125,6 +151,31 @@ TEST_CASE("GameModel")
                 randomSource.SetNextInts({ 1 });
                 model.MovePlayer(10);
                 REQUIRE_THROWS_AS(model.MovePlayer(2), PlayerDeadException);
+            }
+        }
+
+        SECTION("To bats room")
+        {
+            model.SetBatsRooms(10, 19);
+
+            SECTION("One bat snatch")
+            {
+                randomSource.SetNextInts({ 5 });
+                eventvec events = model.MovePlayer(10);
+                REQUIRE(events == eventvec({
+                    Event::BatSnatch
+                }));
+                REQUIRE(model.GetPlayerRoom() == 5);
+            }
+
+            SECTION("Two bat snatches")
+            {
+                randomSource.SetNextInts({ 19, 7 });
+                eventvec events = model.MovePlayer(10);
+                REQUIRE(events == eventvec({
+                    Event::BatSnatch, Event::BatSnatch
+                }));
+                REQUIRE(model.GetPlayerRoom() == 7);
             }
         }
     }

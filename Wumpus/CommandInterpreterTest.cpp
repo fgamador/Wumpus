@@ -84,8 +84,14 @@ public:
         return wumpusAdjacent;
     }
 
+    bool BatsAdjacent() const
+    {
+        return batsAdjacent;
+    }
+
     bool playerAlive = true;
     bool wumpusAdjacent = false;
+    bool batsAdjacent = false;
 };
 
 TEST_CASE("CommandInterpreter")
@@ -107,6 +113,15 @@ TEST_CASE("CommandInterpreter")
         auto output = interp.Input("");
         REQUIRE(commands.invoked.empty());
         REQUIRE(output[0] == Msg::SmellWumpus);
+        RequireInitialMsg(strvec(output.begin() + 1, output.end()));
+    }
+
+    SECTION("Initial state, bats adjacent")
+    {
+        playerState.batsAdjacent = true;
+        auto output = interp.Input("");
+        REQUIRE(commands.invoked.empty());
+        REQUIRE(output[0] == Msg::BatsNearby);
         RequireInitialMsg(strvec(output.begin() + 1, output.end()));
     }
 
@@ -185,7 +200,7 @@ TEST_CASE("CommandInterpreter")
             REQUIRE(output == strvec({ Msg::Impossible, Msg::WhereTo }));
         }
 
-        SECTION("Bumped Wumpus")
+        SECTION("Bumped wumpus")
         {
             commands.events = { Event::BumpedWumpus };
             strvec output = interp.Input("2");
@@ -194,13 +209,22 @@ TEST_CASE("CommandInterpreter")
             RequireInitialMsg(strvec(output.begin() + 1, output.end()));
         }
 
-        SECTION("Bumped and eaten by Wumpus")
+        SECTION("Bumped and eaten by wumpus")
         {
             commands.events = { Event::BumpedWumpus, Event::EatenByWumpus };
             playerState.playerAlive = false;
             strvec output = interp.Input("2");
             REQUIRE(commands.invoked == strvec({ "MovePlayer 2" }));
             REQUIRE(output == strvec({ Msg::BumpedWumpus, Msg::WumpusGotYou, Msg::YouLose, Msg::SameSetup }));
+        }
+
+        SECTION("Bat snatch")
+        {
+            commands.events = { Event::BatSnatch };
+            strvec output = interp.Input("2");
+            REQUIRE(commands.invoked == strvec({ "MovePlayer 2" }));
+            REQUIRE(output[0] == Msg::BatSnatch);
+            RequireInitialMsg(strvec(output.begin() + 1, output.end()));
         }
     }
 

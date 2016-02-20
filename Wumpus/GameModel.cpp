@@ -1,5 +1,14 @@
 #include "GameModel.h"
 
+namespace
+{
+    void ValidateRoom(int room)
+    {
+        if (room < 1 || room > 20)
+            throw NoSuchRoomException();
+    }
+}
+
 GameModel::GameModel(IRandomSource& randomSource)
     : m_randomSource(&randomSource)
 {
@@ -9,36 +18,44 @@ void GameModel::RandomInit()
 {
     m_playerRoom = m_initialPlayerRoom = m_randomSource->NextInt(1, 20);
     m_wumpusRoom = m_randomSource->NextInt(1, 20);
+    m_batsRoom1 = m_randomSource->NextInt(1, 20);
+    m_batsRoom2 = m_randomSource->NextInt(1, 20);
     // TODO check for initial events?
 }
 
 void GameModel::SetPlayerRoom(int room)
 {
-    if (room < 1 || room > 20)
-        throw NoSuchRoomException();
-
+    ValidateRoom(room);
     m_playerRoom = room;
 }
 
 void GameModel::SetWumpusRoom(int room)
 {
-    if (room < 1 || room > 20)
-        throw NoSuchRoomException();
-
+    ValidateRoom(room);
     m_wumpusRoom = room;
+}
+
+void GameModel::SetBatsRooms(int room1, int room2)
+{
+    ValidateRoom(room1);
+    ValidateRoom(room2);
+    m_batsRoom1 = room1;
+    m_batsRoom2 = room2;
 }
 
 eventvec GameModel::MovePlayer(int room)
 {
     if (!m_playerAlive)
         throw PlayerDeadException();
-
-    if (room < 1 || room > 20)
-        throw NoSuchRoomException();
-
+    ValidateRoom(room);
     if (!m_map.AreConnected(m_playerRoom, room))
         throw RoomsNotConnectedException();
 
+    return PlacePlayer(room);
+}
+
+eventvec GameModel::PlacePlayer(int room)
+{
     m_playerRoom = room;
 
     if (m_playerRoom == m_wumpusRoom)
@@ -53,7 +70,14 @@ eventvec GameModel::MovePlayer(int room)
         return{ Event::BumpedWumpus, Event::EatenByWumpus };
     }
 
-    return {};
+    if (m_playerRoom == m_batsRoom1 || m_playerRoom == m_batsRoom2)
+    {
+        eventvec events = PlacePlayer(m_randomSource->NextInt(1, 20));
+        events.insert(events.begin(), Event::BatSnatch);
+        return events;
+    }
+
+    return{};
 }
 
 eventvec GameModel::Replay()
@@ -91,7 +115,22 @@ bool GameModel::WumpusAdjacent() const
     return m_map.AreConnected(m_playerRoom, m_wumpusRoom);
 }
 
+bool GameModel::BatsAdjacent() const
+{
+    return m_map.AreConnected(m_playerRoom, m_batsRoom1) || m_map.AreConnected(m_playerRoom, m_batsRoom2);
+}
+
 int GameModel::GetWumpusRoom() const
 {
     return m_wumpusRoom;
+}
+
+int GameModel::GetBatsRoom1() const
+{
+    return m_batsRoom1;
+}
+
+int GameModel::GetBatsRoom2() const
+{
+    return m_batsRoom2;
 }
