@@ -102,6 +102,8 @@ strvec CommandInterpreter::Input(string input)
 
 void CommandInterpreter::InitialState::Input(string input, CommandInterpreter& interp) const
 {
+    interp.Output(Msg::HuntTheWumpus);
+    interp.Output("");
     OutputStandardMessage(interp);
     interp.SetState(AwaitingCommand);
 }
@@ -187,6 +189,7 @@ void CommandInterpreter::AwaitingReplayState::Input(string input, CommandInterpr
     {
         interp.m_commands.Replay();
         interp.Output(Msg::HuntTheWumpus);
+        interp.Output("");
         Initial.OutputStandardMessage(interp);
         interp.SetState(AwaitingCommand);
     }
@@ -194,6 +197,7 @@ void CommandInterpreter::AwaitingReplayState::Input(string input, CommandInterpr
     {
         interp.m_commands.Restart();
         interp.Output(Msg::HuntTheWumpus);
+        interp.Output("");
         Initial.OutputStandardMessage(interp);
         interp.SetState(AwaitingCommand);
     }

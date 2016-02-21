@@ -127,7 +127,7 @@ TEST_CASE("CommandInterpreter")
     {
         auto output = interp.Input("");
         RequireCommands(commands, {});
-        RequireNextMoveOutput(output);
+        RequireNextMoveOutput(output, { Msg::HuntTheWumpus, "" });
     }
 
     SECTION("Initial state, wumpus adjacent")
@@ -135,7 +135,7 @@ TEST_CASE("CommandInterpreter")
         playerState.wumpusAdjacent = true;
         auto output = interp.Input("");
         RequireCommands(commands, {});
-        RequireNextMoveOutput(output, { Msg::SmellWumpus });
+        RequireNextMoveOutput(output, { Msg::HuntTheWumpus, "", Msg::SmellWumpus });
     }
 
     SECTION("Initial state, bats adjacent")
@@ -143,7 +143,7 @@ TEST_CASE("CommandInterpreter")
         playerState.batsAdjacent = true;
         auto output = interp.Input("");
         RequireCommands(commands, {});
-        RequireNextMoveOutput(output, { Msg::BatsNearby });
+        RequireNextMoveOutput(output, { Msg::HuntTheWumpus, "", Msg::BatsNearby });
     }
 
     SECTION("Initial state, pit adjacent")
@@ -151,7 +151,7 @@ TEST_CASE("CommandInterpreter")
         playerState.pitAdjacent = true;
         auto output = interp.Input("");
         RequireCommands(commands, {});
-        RequireNextMoveOutput(output, { Msg::FeelDraft });
+        RequireNextMoveOutput(output, { Msg::HuntTheWumpus, "", Msg::FeelDraft });
     }
 
     SECTION("Awaiting command")
@@ -290,14 +290,14 @@ TEST_CASE("CommandInterpreter")
         {
             strvec output = interp.Input("Y");
             RequireCommands(commands, { "Replay" });
-            RequireNextMoveOutput(output, { Msg::HuntTheWumpus });
+            RequireNextMoveOutput(output, { Msg::HuntTheWumpus, "" });
         }
 
         SECTION("N input")
         {
             strvec output = interp.Input("N");
             RequireCommands(commands, { "Restart" });
-            RequireNextMoveOutput(output, { Msg::HuntTheWumpus });
+            RequireNextMoveOutput(output, { Msg::HuntTheWumpus, "" });
         }
     }
 
@@ -311,6 +311,8 @@ TEST_CASE("CommandInterpreter")
 
         ostringstream expected;
         expected
+            << Msg::HuntTheWumpus << endl
+            << endl
             << Msg::YouAreInRoom << "1" << endl
             << Msg::TunnelsLeadTo << "2 3 4" << endl
             << endl
