@@ -7,18 +7,6 @@
 #include "Msg.h"
 #include "PlayerState.h"
 
-namespace {
-    void RequireInitialMsg(const strvec& output)
-    {
-        REQUIRE(output == strvec({
-            Msg::YouAreInRoom + "1",
-            Msg::TunnelsLeadTo + "2 3 4",
-            "",
-            Msg::ShootOrMove
-        }));
-    }
-}
-
 class GameCommandsSpy : public GameCommands
 {
 public:
@@ -100,6 +88,35 @@ public:
     bool pitAdjacent = false;
 };
 
+namespace {
+    void RequireCommands(const GameCommandsSpy& commands, const strvec& invoked)
+    {
+        REQUIRE(commands.invoked == invoked);
+    }
+
+    void RequireOutput(const strvec& output, const strvec& msgs)
+    {
+        REQUIRE(output == msgs);
+    }
+
+    void RequireNextMoveOutput(const strvec& output)
+    {
+        RequireOutput(output, {
+            Msg::YouAreInRoom + "1",
+            Msg::TunnelsLeadTo + "2 3 4",
+            "",
+            Msg::ShootOrMove
+        });
+    }
+
+    void RequireNextMoveOutput(const strvec& output, const strvec& leadingMsgs)
+    {
+        for (unsigned i = 0; i < leadingMsgs.size(); ++i)
+            REQUIRE(output[i] == leadingMsgs[i]);
+        RequireNextMoveOutput(strvec(output.begin() + leadingMsgs.size(), output.end()));
+    }
+}
+
 TEST_CASE("CommandInterpreter")
 {
     GameCommandsSpy commands;
@@ -109,35 +126,32 @@ TEST_CASE("CommandInterpreter")
     SECTION("Initial state")
     {
         auto output = interp.Input("");
-        REQUIRE(commands.invoked.empty());
-        RequireInitialMsg(output);
+        RequireCommands(commands, {});
+        RequireNextMoveOutput(output);
     }
 
     SECTION("Initial state, wumpus adjacent")
     {
         playerState.wumpusAdjacent = true;
         auto output = interp.Input("");
-        REQUIRE(commands.invoked.empty());
-        REQUIRE(output[0] == Msg::SmellWumpus);
-        RequireInitialMsg(strvec(output.begin() + 1, output.end()));
+        RequireCommands(commands, {});
+        RequireNextMoveOutput(output, { Msg::SmellWumpus });
     }
 
     SECTION("Initial state, bats adjacent")
     {
         playerState.batsAdjacent = true;
         auto output = interp.Input("");
-        REQUIRE(commands.invoked.empty());
-        REQUIRE(output[0] == Msg::BatsNearby);
-        RequireInitialMsg(strvec(output.begin() + 1, output.end()));
+        RequireCommands(commands, {});
+        RequireNextMoveOutput(output, { Msg::BatsNearby });
     }
 
     SECTION("Initial state, pit adjacent")
     {
         playerState.pitAdjacent = true;
         auto output = interp.Input("");
-        REQUIRE(commands.invoked.empty());
-        REQUIRE(output[0] == Msg::FeelDraft);
-        RequireInitialMsg(strvec(output.begin() + 1, output.end()));
+        RequireCommands(commands, {});
+        RequireNextMoveOutput(output, { Msg::FeelDraft });
     }
 
     SECTION("Awaiting command")
@@ -147,29 +161,29 @@ TEST_CASE("CommandInterpreter")
         SECTION("Empty input")
         {
             strvec output = interp.Input("");
-            REQUIRE(commands.invoked.empty());
-            REQUIRE(output == strvec({ Msg::ShootOrMove }));
+            RequireCommands(commands, {});
+            RequireOutput(output, { Msg::ShootOrMove });
         }
 
         SECTION("Unrecognized input")
         {
             strvec output = interp.Input("X");
-            REQUIRE(commands.invoked.empty());
-            REQUIRE(output == strvec({ Msg::Huh, Msg::ShootOrMove }));
+            RequireCommands(commands, {});
+            RequireOutput(output, { Msg::Huh, Msg::ShootOrMove });
         }
 
         SECTION("M input")
         {
             strvec output = interp.Input("M");
-            REQUIRE(commands.invoked.empty());
-            REQUIRE(output == strvec({ Msg::WhereTo }));
+            RequireCommands(commands, {});
+            RequireOutput(output, { Msg::WhereTo });
         }
 
         SECTION("m input")
         {
             strvec output = interp.Input("M");
-            REQUIRE(commands.invoked.empty());
-            REQUIRE(output == strvec({ Msg::WhereTo }));
+            RequireCommands(commands, {});
+            RequireOutput(output, { Msg::WhereTo });
         }
     }
 
@@ -181,47 +195,46 @@ TEST_CASE("CommandInterpreter")
         SECTION("Empty input")
         {
             strvec output = interp.Input("");
-            REQUIRE(commands.invoked.empty());
-            REQUIRE(output == strvec({ Msg::WhereTo }));
+            RequireCommands(commands, {});
+            RequireOutput(output, { Msg::WhereTo });
         }
 
         SECTION("Unparsable input")
         {
             strvec output = interp.Input("X");
-            REQUIRE(commands.invoked.empty());
-            REQUIRE(output == strvec({ Msg::Huh, Msg::WhereTo }));
+            RequireCommands(commands, {});
+            RequireOutput(output, { Msg::Huh, Msg::WhereTo });
         }
 
         SECTION("Room-number input")
         {
             strvec output = interp.Input("2");
-            REQUIRE(commands.invoked == strvec({ "MovePlayer 2" }));
-            RequireInitialMsg(output);
+            RequireCommands(commands, { "MovePlayer 2" });
+            RequireNextMoveOutput(output);
         }
 
         SECTION("Room-number input, no such room")
         {
             commands.willThrowNoSuchRoomException = true;
             strvec output = interp.Input("21");
-            REQUIRE(commands.invoked.empty());
-            REQUIRE(output == strvec({ Msg::Impossible, Msg::WhereTo }));
+            RequireCommands(commands, {});
+            RequireOutput(output, { Msg::Impossible, Msg::WhereTo });
         }
 
         SECTION("Room-number input, unconnected room")
         {
             commands.willThrowRoomsNotConnectedException = true;
             strvec output = interp.Input("5");
-            REQUIRE(commands.invoked.empty());
-            REQUIRE(output == strvec({ Msg::Impossible, Msg::WhereTo }));
+            RequireCommands(commands, {});
+            RequireOutput(output, { Msg::Impossible, Msg::WhereTo });
         }
 
         SECTION("Bumped wumpus")
         {
             commands.events = { Event::BumpedWumpus };
             strvec output = interp.Input("2");
-            REQUIRE(commands.invoked == strvec({ "MovePlayer 2" }));
-            REQUIRE(output[0] == Msg::BumpedWumpus);
-            RequireInitialMsg(strvec(output.begin() + 1, output.end()));
+            RequireCommands(commands, { "MovePlayer 2" });
+            RequireNextMoveOutput(output, { Msg::BumpedWumpus });
         }
 
         SECTION("Bumped and eaten by wumpus")
@@ -229,17 +242,16 @@ TEST_CASE("CommandInterpreter")
             commands.events = { Event::BumpedWumpus, Event::EatenByWumpus };
             playerState.playerAlive = false;
             strvec output = interp.Input("2");
-            REQUIRE(commands.invoked == strvec({ "MovePlayer 2" }));
-            REQUIRE(output == strvec({ Msg::BumpedWumpus, Msg::WumpusGotYou, Msg::YouLose, Msg::SameSetup }));
+            RequireCommands(commands, { "MovePlayer 2" });
+            RequireOutput(output, { Msg::BumpedWumpus, Msg::WumpusGotYou, Msg::YouLose, Msg::SameSetup });
         }
 
         SECTION("Bat snatch")
         {
             commands.events = { Event::BatSnatch };
             strvec output = interp.Input("2");
-            REQUIRE(commands.invoked == strvec({ "MovePlayer 2" }));
-            REQUIRE(output[0] == Msg::BatSnatch);
-            RequireInitialMsg(strvec(output.begin() + 1, output.end()));
+            RequireCommands(commands, { "MovePlayer 2" });
+            RequireNextMoveOutput(output, { Msg::BatSnatch });
         }
 
         SECTION("Fell in pit")
@@ -247,8 +259,8 @@ TEST_CASE("CommandInterpreter")
             commands.events = { Event::FellInPit };
             playerState.playerAlive = false;
             strvec output = interp.Input("2");
-            REQUIRE(commands.invoked == strvec({ "MovePlayer 2" }));
-            REQUIRE(output == strvec({ Msg::FellInPit, Msg::YouLose, Msg::SameSetup }));
+            RequireCommands(commands, { "MovePlayer 2" });
+            RequireOutput(output, { Msg::FellInPit, Msg::YouLose, Msg::SameSetup });
         }
     }
 
@@ -263,31 +275,29 @@ TEST_CASE("CommandInterpreter")
         SECTION("Empty input")
         {
             strvec output = interp.Input("");
-            REQUIRE(commands.invoked.empty());
-            REQUIRE(output == strvec({ Msg::SameSetup }));
+            RequireCommands(commands, {});
+            RequireOutput(output, { Msg::SameSetup });
         }
 
         SECTION("Unrecognized input")
         {
             strvec output = interp.Input("X");
-            REQUIRE(commands.invoked.empty());
-            REQUIRE(output == strvec({ Msg::Huh, Msg::SameSetup }));
+            RequireCommands(commands, {});
+            RequireOutput(output, { Msg::Huh, Msg::SameSetup });
         }
 
         SECTION("Y input")
         {
             strvec output = interp.Input("Y");
-            REQUIRE(commands.invoked == strvec({ "Replay" }));
-            REQUIRE(output[0] == Msg::HuntTheWumpus);
-            RequireInitialMsg(strvec(output.begin() + 1, output.end()));
+            RequireCommands(commands, { "Replay" });
+            RequireNextMoveOutput(output, { Msg::HuntTheWumpus });
         }
 
         SECTION("N input")
         {
             strvec output = interp.Input("N");
-            REQUIRE(commands.invoked == strvec({ "Restart" }));
-            REQUIRE(output[0] == Msg::HuntTheWumpus);
-            RequireInitialMsg(strvec(output.begin() + 1, output.end()));
+            RequireCommands(commands, { "Restart" });
+            RequireNextMoveOutput(output, { Msg::HuntTheWumpus });
         }
     }
 
