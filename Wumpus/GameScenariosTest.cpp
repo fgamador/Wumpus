@@ -27,13 +27,14 @@ TEST_CASE("Full game")
         Msg::WhereTo
     }));
 
+    randomSource.SetNextInts({ 7 });
     output = interpreter.Input("1");
-    //REQUIRE(output == strvec({
-    //    Msg::BatSnatch,
-    //    Msg::FellInPit,
-    //    Msg::YouLose,
-    //    Msg::SameSetup
-    //}));
+    REQUIRE(output == strvec({
+        Msg::BatSnatch,
+        Msg::FellInPit,
+        Msg::YouLose,
+        Msg::SameSetup
+    }));
 }
 
 TEST_CASE("In room 2")

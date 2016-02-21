@@ -89,9 +89,15 @@ public:
         return batsAdjacent;
     }
 
+    bool PitAdjacent() const
+    {
+        return pitAdjacent;
+    }
+
     bool playerAlive = true;
     bool wumpusAdjacent = false;
     bool batsAdjacent = false;
+    bool pitAdjacent = false;
 };
 
 TEST_CASE("CommandInterpreter")
@@ -122,6 +128,15 @@ TEST_CASE("CommandInterpreter")
         auto output = interp.Input("");
         REQUIRE(commands.invoked.empty());
         REQUIRE(output[0] == Msg::BatsNearby);
+        RequireInitialMsg(strvec(output.begin() + 1, output.end()));
+    }
+
+    SECTION("Initial state, pit adjacent")
+    {
+        playerState.pitAdjacent = true;
+        auto output = interp.Input("");
+        REQUIRE(commands.invoked.empty());
+        REQUIRE(output[0] == Msg::FeelDraft);
         RequireInitialMsg(strvec(output.begin() + 1, output.end()));
     }
 
@@ -225,6 +240,15 @@ TEST_CASE("CommandInterpreter")
             REQUIRE(commands.invoked == strvec({ "MovePlayer 2" }));
             REQUIRE(output[0] == Msg::BatSnatch);
             RequireInitialMsg(strvec(output.begin() + 1, output.end()));
+        }
+
+        SECTION("Fell in pit")
+        {
+            commands.events = { Event::FellInPit };
+            playerState.playerAlive = false;
+            strvec output = interp.Input("2");
+            REQUIRE(commands.invoked == strvec({ "MovePlayer 2" }));
+            REQUIRE(output == strvec({ Msg::FellInPit, Msg::YouLose, Msg::SameSetup }));
         }
     }
 

@@ -10,12 +10,13 @@ TEST_CASE("GameModel")
 
     SECTION("Random init")
     {
-        randomSource.SetNextInts({ 2, 11, 5, 16 });
+        randomSource.SetNextInts({ 2, 11, 5, 16, 7, 9 });
         model.RandomInit();
         REQUIRE(model.GetPlayerRoom() == 2);
         REQUIRE(model.GetWumpusRoom() == 11);
         REQUIRE(model.GetBatsRoom1() == 5);
         REQUIRE(model.GetBatsRoom2() == 16);
+        REQUIRE(model.GetPitRooms() == ints2({ 7, 9 }));
     }
 
     SECTION("SetPlayerRoom")
@@ -99,6 +100,30 @@ TEST_CASE("GameModel")
         }
     }
 
+    SECTION("PitAdjacent")
+    {
+        SECTION("Adjacent1")
+        {
+            model.SetPlayerRoom(2);
+            model.SetPitRooms(10, 19);
+            REQUIRE(model.PitAdjacent());
+        }
+
+        SECTION("Adjacent2")
+        {
+            model.SetPlayerRoom(2);
+            model.SetPitRooms(19, 10);
+            REQUIRE(model.PitAdjacent());
+        }
+
+        SECTION("Not adjacent")
+        {
+            model.SetPlayerRoom(2);
+            model.SetPitRooms(11, 19);
+            REQUIRE(!model.PitAdjacent());
+        }
+    }
+
     SECTION("MovePlayer")
     {
         model.SetPlayerRoom(2);
@@ -176,6 +201,29 @@ TEST_CASE("GameModel")
                     Event::BatSnatch, Event::BatSnatch
                 }));
                 REQUIRE(model.GetPlayerRoom() == 7);
+            }
+        }
+
+        SECTION("To pit room")
+        {
+            model.SetPitRooms(10, 3);
+
+            SECTION("Fall in pit 1")
+            {
+                eventvec events = model.MovePlayer(10);
+                REQUIRE(events == eventvec({
+                    Event::FellInPit
+                }));
+                REQUIRE(!model.PlayerAlive());
+            }
+
+            SECTION("Fall in pit 2")
+            {
+                eventvec events = model.MovePlayer(3);
+                REQUIRE(events == eventvec({
+                    Event::FellInPit
+                }));
+                REQUIRE(!model.PlayerAlive());
             }
         }
     }

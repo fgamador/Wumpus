@@ -20,6 +20,8 @@ void GameModel::RandomInit()
     m_wumpusRoom = m_randomSource->NextInt(1, 20);
     m_batsRoom1 = m_randomSource->NextInt(1, 20);
     m_batsRoom2 = m_randomSource->NextInt(1, 20);
+    m_pitRooms[0] = m_randomSource->NextInt(1, 20);
+    m_pitRooms[1] = m_randomSource->NextInt(1, 20);
     // TODO check for initial events?
 }
 
@@ -41,6 +43,13 @@ void GameModel::SetBatsRooms(int room1, int room2)
     ValidateRoom(room2);
     m_batsRoom1 = room1;
     m_batsRoom2 = room2;
+}
+
+void GameModel::SetPitRooms(int room1, int room2)
+{
+    ValidateRoom(room1);
+    ValidateRoom(room2);
+    m_pitRooms = { room1, room2 };
 }
 
 eventvec GameModel::MovePlayer(int room)
@@ -75,6 +84,12 @@ eventvec GameModel::PlacePlayer(int room)
         eventvec events = PlacePlayer(m_randomSource->NextInt(1, 20));
         events.insert(events.begin(), Event::BatSnatch);
         return events;
+    }
+
+    if (m_playerRoom == m_pitRooms[0] || m_playerRoom == m_pitRooms[1])
+    {
+        m_playerAlive = false;
+        return{ Event::FellInPit };
     }
 
     return{};
@@ -120,6 +135,11 @@ bool GameModel::BatsAdjacent() const
     return m_map.AreConnected(m_playerRoom, m_batsRoom1) || m_map.AreConnected(m_playerRoom, m_batsRoom2);
 }
 
+bool GameModel::PitAdjacent() const
+{
+    return m_map.AreConnected(m_playerRoom, m_pitRooms[0]) || m_map.AreConnected(m_playerRoom, m_pitRooms[1]);
+}
+
 int GameModel::GetWumpusRoom() const
 {
     return m_wumpusRoom;
@@ -133,4 +153,9 @@ int GameModel::GetBatsRoom1() const
 int GameModel::GetBatsRoom2() const
 {
     return m_batsRoom2;
+}
+
+ints2 GameModel::GetPitRooms() const
+{
+    return m_pitRooms;
 }

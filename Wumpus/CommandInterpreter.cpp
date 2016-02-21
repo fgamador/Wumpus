@@ -26,6 +26,9 @@ protected:
             case Event::EatenByWumpus:
                 interp.Output(Msg::WumpusGotYou);
                 break;
+            case Event::FellInPit:
+                interp.Output(Msg::FellInPit);
+                break;
             }
         }
     }
@@ -212,6 +215,8 @@ void CommandInterpreter::OutputPlayerState()
         Output(Msg::SmellWumpus);
     if (m_playerState.BatsAdjacent())
         Output(Msg::BatsNearby);
+    if (m_playerState.PitAdjacent())
+        Output(Msg::FeelDraft);
 
     ostringstream out1;
     out1 << Msg::YouAreInRoom << m_playerState.GetPlayerRoom();
