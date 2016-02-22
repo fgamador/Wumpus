@@ -5,5 +5,7 @@ enum class Event
     BatSnatch,
     BumpedWumpus,
     EatenByWumpus,
-    FellInPit
+    FellInPit,
+    KilledWumpus,
+    ShotSelf
 };

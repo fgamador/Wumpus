@@ -22,6 +22,6 @@ public:
     }
 
 private:
-    intvec m_nextInts;
-    intvec::iterator m_nextInt;
+    intvec m_nextInts = {};
+    intvec::iterator m_nextInt = m_nextInts.end();
 };

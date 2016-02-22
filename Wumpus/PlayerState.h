@@ -15,4 +15,5 @@ public:
     virtual bool WumpusAdjacent() const = 0;
     virtual bool BatsAdjacent() const = 0;
     virtual bool PitAdjacent() const = 0;
+    virtual bool WumpusAlive() const = 0;
 };

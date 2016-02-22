@@ -227,4 +227,113 @@ TEST_CASE("GameModel")
             }
         }
     }
+
+    SECTION("Crooked arrow")
+    {
+        model.SetPlayerRoom(2);
+
+        SECTION("Invalid path length")
+        {
+            REQUIRE_THROWS_AS(model.PrepareArrow(0), ArrowPathLengthException);
+            REQUIRE_THROWS_AS(model.PrepareArrow(6), ArrowPathLengthException);
+        }
+
+        SECTION("Move without Prepare")
+        {
+            REQUIRE_THROWS_AS(model.MoveArrow(10), ArrowPathLengthException);
+        }
+
+        SECTION("Invalid path")
+        {
+            model.PrepareArrow(2);
+
+            SECTION("No such room")
+            {
+                REQUIRE_THROWS_AS(model.MoveArrow(0), NoSuchRoomException);
+                REQUIRE_THROWS_AS(model.MoveArrow(21), NoSuchRoomException);
+            }
+
+            SECTION("Room not connected")
+            {
+                model.MoveArrow(10);
+                REQUIRE_THROWS_AS(model.MoveArrow(5), RoomsNotConnectedException);
+            }
+
+            SECTION("Double back")
+            {
+                model.MoveArrow(10);
+                REQUIRE_THROWS_AS(model.MoveArrow(2), ArrowDoubleBackException);
+            }
+
+            SECTION("Too many moves")
+            {
+                model.SetWumpusRoom(1);
+                model.MoveArrow(10);
+                model.MoveArrow(11);
+                REQUIRE_THROWS_AS(model.MoveArrow(12), ArrowPathLengthException);
+            }
+        }
+
+        SECTION("Kill wumpus on second room of three-room path")
+        {
+            model.SetWumpusRoom(11);
+            model.PrepareArrow(3);
+            eventvec events = model.MoveArrow(10);
+            REQUIRE(events.empty());
+            events = model.MoveArrow(11);
+            REQUIRE(events == eventvec({
+                Event::KilledWumpus
+            }));
+            REQUIRE(!model.WumpusAlive());
+        }
+
+        SECTION("Killing wumpus ends path")
+        {
+            model.SetWumpusRoom(10);
+            model.PrepareArrow(2);
+            model.MoveArrow(10);
+            REQUIRE_THROWS_AS(model.MoveArrow(11), ArrowPathLengthException);
+        }
+
+        SECTION("Wumpus move after miss")
+        {
+            randomSource.SetNextInts({ 1 });
+            model.SetWumpusRoom(9);
+            model.PrepareArrow(2);
+            model.MoveArrow(10);
+            eventvec events = model.MoveArrow(11);
+            REQUIRE(events.empty());
+            REQUIRE(model.GetWumpusRoom() == 10);
+            REQUIRE(model.WumpusAlive());
+        }
+
+        SECTION("Wumpus move to player after miss")
+        {
+            randomSource.SetNextInts({ 0 });
+            model.SetWumpusRoom(1);
+            model.PrepareArrow(1);
+            eventvec events = model.MoveArrow(10);
+            REQUIRE(model.GetWumpusRoom() == 2);
+            REQUIRE(model.WumpusAlive());
+            REQUIRE(events == eventvec({
+                Event::EatenByWumpus
+            }));
+            REQUIRE(!model.PlayerAlive());
+        }
+
+        SECTION("Hit self")
+        {
+            model.SetWumpusRoom(20);
+            model.PrepareArrow(5);
+            model.MoveArrow(3);
+            model.MoveArrow(4);
+            model.MoveArrow(5);
+            model.MoveArrow(1);
+            eventvec events = model.MoveArrow(2);
+            REQUIRE(events == eventvec({
+                Event::ShotSelf
+            }));
+            REQUIRE(!model.PlayerAlive());
+        }
+    }
 }

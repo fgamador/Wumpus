@@ -76,6 +76,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="ArrowDoubleBackException.h" />
+    <ClInclude Include="ArrowPathLengthException.h" />
     <ClInclude Include="catch.hpp" />
     <ClInclude Include="CommandInterpreter.h" />
     <ClInclude Include="Event.h" />

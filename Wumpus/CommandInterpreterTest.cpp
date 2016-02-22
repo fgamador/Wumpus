@@ -23,6 +23,16 @@ public:
         return PostClearEvents();
     }
 
+    void PrepareArrow(int numRooms) override
+    {
+    }
+
+    eventvec MoveArrow(int room) override
+    {
+        //invoked.push_back("ShootArrow " + to_string(rooms));
+        return PostClearEvents();
+    }
+
     eventvec Replay() override
     {
         invoked.push_back("Replay");
@@ -82,10 +92,16 @@ public:
         return pitAdjacent;
     }
 
+    bool WumpusAlive() const
+    {
+        return wumpusAlive;
+    }
+
     bool playerAlive = true;
     bool wumpusAdjacent = false;
     bool batsAdjacent = false;
     bool pitAdjacent = false;
+    bool wumpusAlive = true;
 };
 
 namespace {

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ArrowDoubleBackException.h"
+#include "ArrowPathLengthException.h"
 #include "Event.h"
 #include "GameCommands.h"
 #include "GameMap.h"
@@ -21,6 +23,8 @@ public:
     void SetBatsRooms(int room1, int room2);
     void SetPitRooms(int room1, int room2);
     eventvec MovePlayer(int room) override;
+    void PrepareArrow(int pathLength) override;
+    eventvec MoveArrow(int room) override;
     eventvec Replay() override;
     eventvec Restart() override;
 
@@ -30,6 +34,7 @@ public:
     bool WumpusAdjacent() const override;
     bool BatsAdjacent() const override;
     bool PitAdjacent() const override;
+    bool WumpusAlive() const override;
 
     int GetWumpusRoom() const;
     int GetBatsRoom1() const;
@@ -38,6 +43,10 @@ public:
 
 private:
     eventvec PlacePlayer(int room);
+    void ValidateMoveArrow(int room);
+    eventvec ShotSelf();
+    eventvec KillWumpus();
+    eventvec MoveWumpus();
 
 private:
     IRandomSource* m_randomSource;
@@ -45,9 +54,13 @@ private:
     int m_initialPlayerRoom;
 
     bool m_playerAlive = true;
+    bool m_wumpusAlive = true;
     int m_playerRoom;
     int m_wumpusRoom;
     int m_batsRoom1;
     int m_batsRoom2;
     ints2 m_pitRooms;
+    int m_arrowMovesRemaining = 0;
+    int m_arrowRoom;
+    int m_prevArrowRoom;
 };

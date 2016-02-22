@@ -92,7 +92,75 @@ eventvec GameModel::PlacePlayer(int room)
         return{ Event::FellInPit };
     }
 
-    return{};
+    return {};
+}
+
+void GameModel::PrepareArrow(int pathLength)
+{
+    if (pathLength < 1 || pathLength > 5)
+        throw ArrowPathLengthException();
+    m_arrowMovesRemaining = pathLength;
+    m_arrowRoom = m_prevArrowRoom = m_playerRoom;
+}
+
+eventvec GameModel::MoveArrow(int room)
+{
+    ValidateMoveArrow(room);
+
+    m_arrowMovesRemaining--;
+    m_prevArrowRoom = m_arrowRoom;
+    m_arrowRoom = room;
+
+    if (m_arrowRoom == m_playerRoom)
+        return ShotSelf();
+
+    if (m_arrowRoom == m_wumpusRoom)
+        return KillWumpus();
+
+    if (m_arrowMovesRemaining == 0)
+        return MoveWumpus();
+
+    return {};
+}
+
+void GameModel::ValidateMoveArrow(int room)
+{
+    if (m_arrowMovesRemaining <= 0)
+        throw ArrowPathLengthException();
+    ValidateRoom(room);
+    if (!m_map.AreConnected(m_arrowRoom, room))
+        throw RoomsNotConnectedException();
+    if (room == m_prevArrowRoom)
+        throw ArrowDoubleBackException();
+}
+
+eventvec GameModel::ShotSelf()
+{
+    m_playerAlive = false;
+    return { Event::ShotSelf };
+}
+
+eventvec GameModel::KillWumpus()
+{
+    m_wumpusAlive = false;
+    m_arrowMovesRemaining = 0;
+    return{ Event::KilledWumpus };
+}
+
+eventvec GameModel::MoveWumpus()
+{
+    ints3 connectedRooms = m_map.GetConnectedRooms(m_wumpusRoom);
+    int roomIndex = m_randomSource->NextInt(0, 3);
+    if (roomIndex < (int)connectedRooms.size())
+        m_wumpusRoom = connectedRooms[roomIndex];
+
+    if (m_wumpusRoom == m_playerRoom)
+    {
+        m_playerAlive = false;
+        return { Event::EatenByWumpus };
+    }
+
+    return {};
 }
 
 eventvec GameModel::Replay()
@@ -107,7 +175,7 @@ eventvec GameModel::Restart()
 {
     RandomInit();
     // TODO check for initial events
-    return{};
+    return {};
 }
 
 bool GameModel::PlayerAlive() const
@@ -138,6 +206,11 @@ bool GameModel::BatsAdjacent() const
 bool GameModel::PitAdjacent() const
 {
     return m_map.AreConnected(m_playerRoom, m_pitRooms[0]) || m_map.AreConnected(m_playerRoom, m_pitRooms[1]);
+}
+
+bool GameModel::WumpusAlive() const
+{
+    return m_wumpusAlive;
 }
 
 int GameModel::GetWumpusRoom() const

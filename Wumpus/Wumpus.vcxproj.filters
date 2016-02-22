@@ -60,6 +60,12 @@
     <ClInclude Include="PlayerDeadException.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ArrowPathLengthException.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ArrowDoubleBackException.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CommandInterpreter.cpp">
