@@ -14,8 +14,7 @@ TEST_CASE("GameModel")
         model.RandomInit();
         REQUIRE(model.GetPlayerRoom() == 2);
         REQUIRE(model.GetWumpusRoom() == 11);
-        REQUIRE(model.GetBatsRoom1() == 5);
-        REQUIRE(model.GetBatsRoom2() == 16);
+        REQUIRE(model.GetBatRooms() == ints2({ 5, 16 }));
         REQUIRE(model.GetPitRooms() == ints2({ 7, 9 }));
     }
 
@@ -153,7 +152,7 @@ TEST_CASE("GameModel")
 
             SECTION("Eaten by wumpus")
             {
-                randomSource.SetNextInts({ 1 });
+                randomSource.SetNextInts({ 3 });
                 eventvec events = model.MovePlayer(10);
                 REQUIRE(events == eventvec({
                     Event::BumpedWumpus, Event::EatenByWumpus
@@ -163,17 +162,18 @@ TEST_CASE("GameModel")
 
             SECTION("Wumpus moves")
             {
-                randomSource.SetNextInts({ 4 });
+                randomSource.SetNextInts({ 1 });
                 eventvec events = model.MovePlayer(10);
                 REQUIRE(events == eventvec({
                     Event::BumpedWumpus
                 }));
                 REQUIRE(model.PlayerAlive());
+                REQUIRE(model.GetWumpusRoom() == 9);
             }
 
             SECTION("No move after death")
             {
-                randomSource.SetNextInts({ 1 });
+                randomSource.SetNextInts({ 3 });
                 model.MovePlayer(10);
                 REQUIRE_THROWS_AS(model.MovePlayer(2), PlayerDeadException);
             }

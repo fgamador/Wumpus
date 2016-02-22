@@ -37,15 +37,18 @@ public:
     bool WumpusAlive() const override;
 
     int GetWumpusRoom() const;
-    int GetBatsRoom1() const;
-    int GetBatsRoom2() const;
+    ints2 GetBatRooms() const;
     ints2 GetPitRooms() const;
 
 private:
+    void ValidateMovePlayer(int room);
     eventvec PlacePlayer(int room);
+    eventvec BumpedWumpus();
+    eventvec BatSnatch();
+    eventvec FellInPit();
     void ValidateMoveArrow(int room);
     eventvec ShotSelf();
-    eventvec KillWumpus();
+    eventvec ShotWumpus();
     eventvec MoveWumpus();
 
 private:
@@ -57,8 +60,7 @@ private:
     bool m_wumpusAlive = true;
     int m_playerRoom;
     int m_wumpusRoom;
-    int m_batsRoom1;
-    int m_batsRoom2;
+    ints2 m_batRooms;
     ints2 m_pitRooms;
     int m_arrowMovesRemaining = 0;
     int m_arrowRoom;

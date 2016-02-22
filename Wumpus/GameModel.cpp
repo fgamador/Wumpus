@@ -18,8 +18,8 @@ void GameModel::RandomInit()
 {
     m_playerRoom = m_initialPlayerRoom = m_randomSource->NextInt(1, 20);
     m_wumpusRoom = m_randomSource->NextInt(1, 20);
-    m_batsRoom1 = m_randomSource->NextInt(1, 20);
-    m_batsRoom2 = m_randomSource->NextInt(1, 20);
+    m_batRooms[0] = m_randomSource->NextInt(1, 20);
+    m_batRooms[1] = m_randomSource->NextInt(1, 20);
     m_pitRooms[0] = m_randomSource->NextInt(1, 20);
     m_pitRooms[1] = m_randomSource->NextInt(1, 20);
     // TODO check for initial events?
@@ -41,8 +41,7 @@ void GameModel::SetBatsRooms(int room1, int room2)
 {
     ValidateRoom(room1);
     ValidateRoom(room2);
-    m_batsRoom1 = room1;
-    m_batsRoom2 = room2;
+    m_batRooms = { room1, room2 };
 }
 
 void GameModel::SetPitRooms(int room1, int room2)
@@ -54,13 +53,17 @@ void GameModel::SetPitRooms(int room1, int room2)
 
 eventvec GameModel::MovePlayer(int room)
 {
+    ValidateMovePlayer(room);
+    return PlacePlayer(room);
+}
+
+void GameModel::ValidateMovePlayer(int room)
+{
     if (!m_playerAlive)
         throw PlayerDeadException();
     ValidateRoom(room);
     if (!m_map.AreConnected(m_playerRoom, room))
         throw RoomsNotConnectedException();
-
-    return PlacePlayer(room);
 }
 
 eventvec GameModel::PlacePlayer(int room)
@@ -68,37 +71,42 @@ eventvec GameModel::PlacePlayer(int room)
     m_playerRoom = room;
 
     if (m_playerRoom == m_wumpusRoom)
-    {
-        if (m_randomSource->NextInt(1, 4) == 4)
-        {
-            m_wumpusRoom = m_map.GetConnectedRooms(m_wumpusRoom)[0]; // TODO random room
-            return{ Event::BumpedWumpus };
-        }
+        return BumpedWumpus();
 
-        m_playerAlive = false;
-        return{ Event::BumpedWumpus, Event::EatenByWumpus };
-    }
-
-    if (m_playerRoom == m_batsRoom1 || m_playerRoom == m_batsRoom2)
-    {
-        eventvec events = PlacePlayer(m_randomSource->NextInt(1, 20));
-        events.insert(events.begin(), Event::BatSnatch);
-        return events;
-    }
+    if (m_playerRoom == m_batRooms[0] || m_playerRoom == m_batRooms[1])
+        return BatSnatch();
 
     if (m_playerRoom == m_pitRooms[0] || m_playerRoom == m_pitRooms[1])
-    {
-        m_playerAlive = false;
-        return{ Event::FellInPit };
-    }
+        return FellInPit();
 
     return {};
+}
+
+eventvec GameModel::BumpedWumpus()
+{
+    eventvec events = MoveWumpus();
+    events.insert(events.begin(), Event::BumpedWumpus);
+    return events;
+}
+
+eventvec GameModel::BatSnatch()
+{
+    eventvec events = PlacePlayer(m_randomSource->NextInt(1, 20));
+    events.insert(events.begin(), Event::BatSnatch);
+    return events;
+}
+
+eventvec GameModel::FellInPit()
+{
+    m_playerAlive = false;
+    return { Event::FellInPit };
 }
 
 void GameModel::PrepareArrow(int pathLength)
 {
     if (pathLength < 1 || pathLength > 5)
         throw ArrowPathLengthException();
+
     m_arrowMovesRemaining = pathLength;
     m_arrowRoom = m_prevArrowRoom = m_playerRoom;
 }
@@ -115,7 +123,7 @@ eventvec GameModel::MoveArrow(int room)
         return ShotSelf();
 
     if (m_arrowRoom == m_wumpusRoom)
-        return KillWumpus();
+        return ShotWumpus();
 
     if (m_arrowMovesRemaining == 0)
         return MoveWumpus();
@@ -137,14 +145,15 @@ void GameModel::ValidateMoveArrow(int room)
 eventvec GameModel::ShotSelf()
 {
     m_playerAlive = false;
-    return { Event::ShotSelf };
+    m_arrowMovesRemaining = 0; // TODO test
+    return{ Event::ShotSelf };
 }
 
-eventvec GameModel::KillWumpus()
+eventvec GameModel::ShotWumpus()
 {
     m_wumpusAlive = false;
     m_arrowMovesRemaining = 0;
-    return{ Event::KilledWumpus };
+    return { Event::KilledWumpus };
 }
 
 eventvec GameModel::MoveWumpus()
@@ -200,7 +209,7 @@ bool GameModel::WumpusAdjacent() const
 
 bool GameModel::BatsAdjacent() const
 {
-    return m_map.AreConnected(m_playerRoom, m_batsRoom1) || m_map.AreConnected(m_playerRoom, m_batsRoom2);
+    return m_map.AreConnected(m_playerRoom, m_batRooms[0]) || m_map.AreConnected(m_playerRoom, m_batRooms[1]);
 }
 
 bool GameModel::PitAdjacent() const
@@ -218,14 +227,9 @@ int GameModel::GetWumpusRoom() const
     return m_wumpusRoom;
 }
 
-int GameModel::GetBatsRoom1() const
+ints2 GameModel::GetBatRooms() const
 {
-    return m_batsRoom1;
-}
-
-int GameModel::GetBatsRoom2() const
-{
-    return m_batsRoom2;
+    return m_batRooms;
 }
 
 ints2 GameModel::GetPitRooms() const
