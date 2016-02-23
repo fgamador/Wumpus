@@ -25,11 +25,18 @@ public:
 
     void PrepareArrow(int numRooms) override
     {
+        if (willThrowArrowPathLengthException)
+            throw ArrowPathLengthException();
+        if (willThrowArrowDoubleBackException)
+            throw ArrowDoubleBackException();
+
+        invoked.push_back("PrepareArrow " + to_string(numRooms));
+        events.clear();
     }
 
     eventvec MoveArrow(int room) override
     {
-        //invoked.push_back("ShootArrow " + to_string(rooms));
+        invoked.push_back("MoveArrow " + to_string(room));
         return PostClearEvents();
     }
 
@@ -56,6 +63,8 @@ public:
     bool willThrowNoSuchRoomException = false;
     bool willThrowPlayerDeadException = false;
     bool willThrowRoomsNotConnectedException = false;
+    bool willThrowArrowPathLengthException = false;
+    bool willThrowArrowDoubleBackException = false;
     eventvec events = {};
 };
 
@@ -170,6 +179,10 @@ TEST_CASE("CommandInterpreter")
         RequireNextMoveOutput(output, { Msg::HuntTheWumpus, "", Msg::FeelDraft });
     }
 
+    // TODO SECTION("Initial state, with wumpus)
+    // TODO SECTION("Initial state, with bats)
+    // TODO SECTION("Initial state, with pit)
+
     SECTION("Awaiting command")
     {
         interp.Input("");
@@ -195,11 +208,11 @@ TEST_CASE("CommandInterpreter")
             RequireOutput(output, { Msg::WhereTo });
         }
 
-        SECTION("m input")
+        SECTION("S input")
         {
-            strvec output = interp.Input("M");
+            strvec output = interp.Input("S");
             RequireCommands(commands, {});
-            RequireOutput(output, { Msg::WhereTo });
+            RequireOutput(output, { Msg::NumberOfRooms });
         }
     }
 
@@ -277,6 +290,41 @@ TEST_CASE("CommandInterpreter")
             strvec output = interp.Input("2");
             RequireCommands(commands, { "MovePlayer 2" });
             RequireOutput(output, { Msg::FellInPit, Msg::YouLose, Msg::SameSetup });
+        }
+    }
+
+    SECTION("Awaiting arrow path length")
+    {
+        interp.Input("");
+        interp.Input("S");
+
+        SECTION("Empty input")
+        {
+            strvec output = interp.Input("");
+            RequireCommands(commands, {});
+            RequireOutput(output, { Msg::NumberOfRooms });
+        }
+
+        SECTION("Unparsable input")
+        {
+            strvec output = interp.Input("X");
+            RequireCommands(commands, {});
+            RequireOutput(output, { Msg::Huh, Msg::NumberOfRooms });
+        }
+
+        SECTION("Valid input")
+        {
+            strvec output = interp.Input("2");
+            RequireCommands(commands, { "PrepareArrow 2" });
+            RequireOutput(output, { Msg::RoomNumber });
+        }
+
+        SECTION("Invalid length")
+        {
+            commands.willThrowArrowPathLengthException = true;
+            strvec output = interp.Input("0");
+            RequireCommands(commands, {});
+            RequireOutput(output, { Msg::Impossible, Msg::NumberOfRooms });
         }
     }
 

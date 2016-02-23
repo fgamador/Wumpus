@@ -55,6 +55,20 @@ public:
     void OutputStandardMessage(CommandInterpreter& interp) const override;
 };
 
+class CommandInterpreter::AwaitingArrowPathLengthState : public State
+{
+public:
+    void Input(string input, CommandInterpreter& interp) const override;
+    void OutputStandardMessage(CommandInterpreter& interp) const override;
+};
+
+class CommandInterpreter::AwaitingArrowRoomState : public State
+{
+public:
+    void Input(string input, CommandInterpreter& interp) const override;
+    void OutputStandardMessage(CommandInterpreter& interp) const override;
+};
+
 class CommandInterpreter::AwaitingReplayState : public State
 {
 public:
@@ -65,6 +79,8 @@ public:
 CommandInterpreter::InitialState CommandInterpreter::Initial;
 CommandInterpreter::AwaitingCommandState CommandInterpreter::AwaitingCommand;
 CommandInterpreter::AwaitingMoveRoomState CommandInterpreter::AwaitingMoveRoom;
+CommandInterpreter::AwaitingArrowPathLengthState CommandInterpreter::AwaitingArrowPathLength;
+CommandInterpreter::AwaitingArrowRoomState CommandInterpreter::AwaitingArrowRoom;
 CommandInterpreter::AwaitingReplayState CommandInterpreter::AwaitingReplay;
 
 CommandInterpreter::CommandInterpreter(GameCommands& commands, const PlayerState& playerState)
@@ -124,6 +140,10 @@ void CommandInterpreter::AwaitingCommandState::Input(string input, CommandInterp
     {
         interp.SetState(AwaitingMoveRoom);
     }
+    else if (input == "S" || input == "s")
+    {
+        interp.SetState(AwaitingArrowPathLength);
+    }
     else
     {
         interp.Output(Msg::Huh);
@@ -177,6 +197,47 @@ void CommandInterpreter::AwaitingMoveRoomState::Input(string input, CommandInter
 void CommandInterpreter::AwaitingMoveRoomState::OutputStandardMessage(CommandInterpreter& interp) const
 {
     interp.Output(Msg::WhereTo);
+}
+
+void CommandInterpreter::AwaitingArrowPathLengthState::Input(string input, CommandInterpreter& interp) const
+{
+    if (input == "")
+    {
+        OutputStandardMessage(interp);
+        return;
+    }
+
+    try
+    {
+        interp.m_commands.PrepareArrow(stoi(input));
+        interp.SetState(AwaitingArrowRoom);
+    }
+    catch (const exception&)
+    {
+        interp.Output(Msg::Huh);
+        OutputStandardMessage(interp);
+        return;
+    }
+    catch (const ArrowPathLengthException&)
+    {
+        interp.Output(Msg::Impossible);
+        OutputStandardMessage(interp);
+        return;
+    }
+}
+
+void CommandInterpreter::AwaitingArrowPathLengthState::OutputStandardMessage(CommandInterpreter& interp) const
+{
+    interp.Output(Msg::NumberOfRooms);
+}
+
+void CommandInterpreter::AwaitingArrowRoomState::Input(string input, CommandInterpreter& interp) const
+{
+}
+
+void CommandInterpreter::AwaitingArrowRoomState::OutputStandardMessage(CommandInterpreter& interp) const
+{
+    interp.Output(Msg::RoomNumber);
 }
 
 void CommandInterpreter::AwaitingReplayState::Input(string input, CommandInterpreter& interp) const

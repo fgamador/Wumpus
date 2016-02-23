@@ -22,6 +22,8 @@ private:
     class InitialState;
     class AwaitingCommandState;
     class AwaitingMoveRoomState;
+    class AwaitingArrowPathLengthState;
+    class AwaitingArrowRoomState;
     class AwaitingReplayState;
 
 private:
@@ -38,5 +40,7 @@ private:
     static InitialState Initial;
     static AwaitingCommandState AwaitingCommand;
     static AwaitingMoveRoomState AwaitingMoveRoom;
+    static AwaitingArrowPathLengthState AwaitingArrowPathLength;
+    static AwaitingArrowRoomState AwaitingArrowRoom;
     static AwaitingReplayState AwaitingReplay;
 };

@@ -102,11 +102,11 @@ TEST_CASE("Full game")
     output = interp.Input("15");
     RequireNextMoveOutput(output, { Msg::SmellWumpus }, 15, { 6, 14, 16 });
 
-    //output = interp.Input("S");
-    //RequireOutput(output, { Msg::NumberOfRooms });
+    output = interp.Input("S");
+    RequireOutput(output, { Msg::NumberOfRooms });
 
-    //output = interp.Input("1");
-    //RequireOutput(output, { Msg::RoomNumber });
+    output = interp.Input("1");
+    RequireOutput(output, { Msg::RoomNumber });
 
     //output = interp.Input("16");
     //RequireOutput(output, { Msg::GotTheWumpus, Msg::GetYouNextTime });
