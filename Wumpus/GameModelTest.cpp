@@ -37,24 +37,24 @@ TEST_CASE("GameModel")
     {
         randomSource.SetNextInts({ 2, 11 });
         model.RandomInit();
+        model.SetWumpusRoom(10);
+        model.MovePlayer(10);
         randomSource.SetNextInts({ 9, 3 });
 
         SECTION("Replay")
         {
-            model.MovePlayer(10);
-            //model.MoveWumpus(19);
             model.Replay();
+            REQUIRE(model.PlayerAlive());
             REQUIRE(model.GetPlayerRoom() == 2);
-            //REQUIRE(model.GetWumpusRoom() == 11);
+            REQUIRE(model.GetWumpusRoom() == 11);
         }
 
         SECTION("Restart")
         {
-            model.MovePlayer(10);
-            //model.MoveWumpus(19);
             model.Restart();
+            REQUIRE(model.PlayerAlive());
             REQUIRE(model.GetPlayerRoom() == 9);
-            //REQUIRE(model.GetWumpusRoom() == 3);
+            REQUIRE(model.GetWumpusRoom() == 3);
         }
     }
 

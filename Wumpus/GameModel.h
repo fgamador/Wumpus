@@ -55,6 +55,7 @@ private:
     IRandomSource* m_randomSource;
     GameMap m_map;
     int m_initialPlayerRoom;
+    int m_initialWumpusRoom;
 
     bool m_playerAlive = true;
     bool m_wumpusAlive = true;
