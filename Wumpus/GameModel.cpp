@@ -126,7 +126,7 @@ eventvec GameModel::MoveArrow(int room)
         return ShotWumpus();
 
     if (m_arrowMovesRemaining == 0)
-        return MoveWumpus();
+        return MissedWumpus();
 
     return {};
 }
@@ -154,6 +154,13 @@ eventvec GameModel::ShotWumpus()
     m_wumpusAlive = false;
     m_arrowMovesRemaining = 0;
     return { Event::KilledWumpus };
+}
+
+eventvec GameModel::MissedWumpus()
+{
+    eventvec events = MoveWumpus();
+    events.insert(events.begin(), Event::MissedWumpus);
+    return events;
 }
 
 eventvec GameModel::MoveWumpus()

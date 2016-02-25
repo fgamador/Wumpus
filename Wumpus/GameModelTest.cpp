@@ -302,7 +302,9 @@ TEST_CASE("GameModel")
             model.PrepareArrow(2);
             model.MoveArrow(10);
             eventvec events = model.MoveArrow(11);
-            REQUIRE(events.empty());
+            REQUIRE(events == eventvec({
+                Event::MissedWumpus
+            }));
             REQUIRE(model.GetWumpusRoom() == 10);
             REQUIRE(model.WumpusAlive());
         }
@@ -316,6 +318,7 @@ TEST_CASE("GameModel")
             REQUIRE(model.GetWumpusRoom() == 2);
             REQUIRE(model.WumpusAlive());
             REQUIRE(events == eventvec({
+                Event::MissedWumpus,
                 Event::EatenByWumpus
             }));
             REQUIRE(!model.PlayerAlive());

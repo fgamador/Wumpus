@@ -49,6 +49,7 @@ private:
     void ValidateMoveArrow(int room);
     eventvec ShotSelf();
     eventvec ShotWumpus();
+    eventvec MissedWumpus();
     eventvec MoveWumpus();
 
 private:

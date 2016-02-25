@@ -83,7 +83,7 @@ public:
 
     ints3 GetPlayerConnectedRooms() const
     {
-        return{ 2, 3, 4 };
+        return { 2, 3, 4 };
     }
 
     bool WumpusAdjacent() const
@@ -235,7 +235,7 @@ TEST_CASE("CommandInterpreter")
             RequireOutput(output, { Msg::Huh, Msg::WhereTo });
         }
 
-        SECTION("Room-number input")
+        SECTION("Valid input")
         {
             strvec output = interp.Input("2");
             RequireCommands(commands, { "MovePlayer 2" });
@@ -322,9 +322,48 @@ TEST_CASE("CommandInterpreter")
         SECTION("Invalid length")
         {
             commands.willThrowArrowPathLengthException = true;
-            strvec output = interp.Input("0");
+            strvec output = interp.Input("6");
             RequireCommands(commands, {});
             RequireOutput(output, { Msg::Impossible, Msg::NumberOfRooms });
+        }
+    }
+
+    SECTION("Awaiting arrow room")
+    {
+        interp.Input("");
+        interp.Input("S");
+        interp.Input("3");
+        commands.invoked.clear();
+
+        SECTION("Empty input")
+        {
+            strvec output = interp.Input("");
+            RequireCommands(commands, {});
+            RequireOutput(output, { Msg::RoomNumber });
+        }
+
+        SECTION("Unparsable input")
+        {
+            strvec output = interp.Input("X");
+            RequireCommands(commands, {});
+            RequireOutput(output, { Msg::Huh, Msg::RoomNumber });
+        }
+
+        SECTION("Valid input")
+        {
+            strvec output = interp.Input("10");
+            RequireCommands(commands, { "MoveArrow 10" });
+            RequireOutput(output, { Msg::RoomNumber });
+        }
+
+        SECTION("Full path")
+        {
+            interp.Input("10");
+            interp.Input("11");
+            commands.events = { Event::MissedWumpus };
+            strvec output = interp.Input("12");
+            RequireCommands(commands, { "MoveArrow 10", "MoveArrow 11", "MoveArrow 12" });
+            RequireNextMoveOutput(output, { Msg::Missed });
         }
     }
 

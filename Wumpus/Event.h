@@ -7,5 +7,6 @@ enum class Event
     EatenByWumpus,
     FellInPit,
     KilledWumpus,
+    MissedWumpus,
     ShotSelf
 };

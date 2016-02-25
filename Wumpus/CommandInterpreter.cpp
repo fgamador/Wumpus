@@ -29,6 +29,9 @@ protected:
             case Event::FellInPit:
                 interp.Output(Msg::FellInPit);
                 break;
+            case Event::MissedWumpus:
+                interp.Output(Msg::Missed);
+                break;
             }
         }
     }
@@ -233,6 +236,33 @@ void CommandInterpreter::AwaitingArrowPathLengthState::OutputStandardMessage(Com
 
 void CommandInterpreter::AwaitingArrowRoomState::Input(string input, CommandInterpreter& interp) const
 {
+    if (input == "")
+    {
+        OutputStandardMessage(interp);
+        return;
+    }
+
+    try
+    {
+        eventvec events = interp.m_commands.MoveArrow(stoi(input));
+        OutputEvents(events, interp);
+
+        if (events.empty())
+        {
+            OutputStandardMessage(interp);
+        }
+        else if (interp.m_playerState.PlayerAlive())
+        {
+            Initial.OutputStandardMessage(interp);
+            interp.SetState(AwaitingCommand);
+        }
+    }
+    catch (const exception&)
+    {
+        interp.Output(Msg::Huh);
+        OutputStandardMessage(interp);
+        return;
+    }
 }
 
 void CommandInterpreter::AwaitingArrowRoomState::OutputStandardMessage(CommandInterpreter& interp) const
