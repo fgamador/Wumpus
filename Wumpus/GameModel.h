@@ -20,7 +20,7 @@ public:
     void RandomInit();
     void SetPlayerRoom(int room);
     void SetWumpusRoom(int room);
-    void SetBatsRooms(int room1, int room2);
+    void SetBatRooms(int room1, int room2);
     void SetPitRooms(int room1, int room2);
     eventvec MovePlayer(int room) override;
     void PrepareArrow(int pathLength) override;

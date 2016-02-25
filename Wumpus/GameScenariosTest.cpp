@@ -28,7 +28,7 @@ namespace {
     }
 }
 
-TEST_CASE("Full game")
+TEST_CASE("Article full game")
 {
     RandomSourceStub randomSource;
     GameModel model(randomSource);
@@ -108,6 +108,6 @@ TEST_CASE("Full game")
     output = interp.Input("1");
     RequireOutput(output, { Msg::RoomNumber });
 
-    //output = interp.Input("16");
-    //RequireOutput(output, { Msg::GotTheWumpus, Msg::GetYouNextTime });
+    output = interp.Input("16");
+    RequireOutput(output, { Msg::GotTheWumpus, Msg::GetYouNextTime });
 }

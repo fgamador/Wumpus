@@ -251,6 +251,12 @@ void CommandInterpreter::AwaitingArrowRoomState::Input(string input, CommandInte
         {
             OutputStandardMessage(interp);
         }
+        else if (!interp.m_playerState.WumpusAlive())
+        {
+            interp.Output(Msg::GotTheWumpus);
+            interp.Output(Msg::GetYouNextTime);
+            //interp.SetState(AwaitingCommand);
+        }
         else if (interp.m_playerState.PlayerAlive())
         {
             Initial.OutputStandardMessage(interp);

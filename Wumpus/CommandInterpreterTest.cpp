@@ -356,7 +356,7 @@ TEST_CASE("CommandInterpreter")
             RequireOutput(output, { Msg::RoomNumber });
         }
 
-        SECTION("Full path")
+        SECTION("Full path, miss")
         {
             interp.Input("10");
             interp.Input("11");
@@ -364,6 +364,17 @@ TEST_CASE("CommandInterpreter")
             strvec output = interp.Input("12");
             RequireCommands(commands, { "MoveArrow 10", "MoveArrow 11", "MoveArrow 12" });
             RequireNextMoveOutput(output, { Msg::Missed });
+        }
+
+        SECTION("Full path, hit")
+        {
+            interp.Input("10");
+            interp.Input("11");
+            commands.events = { Event::KilledWumpus };
+            playerState.wumpusAlive = false;
+            strvec output = interp.Input("12");
+            RequireCommands(commands, { "MoveArrow 10", "MoveArrow 11", "MoveArrow 12" });
+            RequireOutput(output, { Msg::GotTheWumpus, Msg::GetYouNextTime });
         }
     }
 

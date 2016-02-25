@@ -37,7 +37,7 @@ void GameModel::SetWumpusRoom(int room)
     m_wumpusRoom = room;
 }
 
-void GameModel::SetBatsRooms(int room1, int room2)
+void GameModel::SetBatRooms(int room1, int room2)
 {
     ValidateRoom(room1);
     ValidateRoom(room2);
@@ -70,13 +70,27 @@ eventvec GameModel::PlacePlayer(int room)
 {
     m_playerRoom = room;
 
-    if (m_playerRoom == m_wumpusRoom)
+    bool inWumpusRoom = (m_playerRoom == m_wumpusRoom);
+    bool inBatRoom = (m_playerRoom == m_batRooms[0] || m_playerRoom == m_batRooms[1]);
+    bool inPitRoom = (m_playerRoom == m_pitRooms[0] || m_playerRoom == m_pitRooms[1]);
+
+    if (inWumpusRoom && inBatRoom)
+    {
+        eventvec events = { Event::BumpedWumpus };
+        eventvec snatchEvents = BatSnatch();
+        eventvec bumpEvents = BumpedWumpus();
+        events.insert(events.end(), snatchEvents.begin(), snatchEvents.end());
+        events.insert(events.end(), bumpEvents.begin() + 1, bumpEvents.end());
+        return events;
+    }
+
+    if (inWumpusRoom)
         return BumpedWumpus();
 
-    if (m_playerRoom == m_batRooms[0] || m_playerRoom == m_batRooms[1])
+    if (inBatRoom)
         return BatSnatch();
 
-    if (m_playerRoom == m_pitRooms[0] || m_playerRoom == m_pitRooms[1])
+    if (inPitRoom)
         return FellInPit();
 
     return {};
@@ -87,6 +101,22 @@ eventvec GameModel::BumpedWumpus()
     eventvec events = MoveWumpus();
     events.insert(events.begin(), Event::BumpedWumpus);
     return events;
+}
+
+eventvec GameModel::MoveWumpus()
+{
+    ints3 connectedRooms = m_map.GetConnectedRooms(m_wumpusRoom);
+    unsigned roomIndex = static_cast<unsigned>(m_randomSource->NextInt(0, 3));
+    if (roomIndex < connectedRooms.size())
+        m_wumpusRoom = connectedRooms[roomIndex];
+
+    if (m_wumpusRoom == m_playerRoom)
+    {
+        m_playerAlive = false;
+        return { Event::EatenByWumpus };
+    }
+
+    return{};
 }
 
 eventvec GameModel::BatSnatch()
@@ -161,22 +191,6 @@ eventvec GameModel::MissedWumpus()
     eventvec events = MoveWumpus();
     events.insert(events.begin(), Event::MissedWumpus);
     return events;
-}
-
-eventvec GameModel::MoveWumpus()
-{
-    ints3 connectedRooms = m_map.GetConnectedRooms(m_wumpusRoom);
-    int roomIndex = m_randomSource->NextInt(0, 3);
-    if (roomIndex < (int)connectedRooms.size())
-        m_wumpusRoom = connectedRooms[roomIndex];
-
-    if (m_wumpusRoom == m_playerRoom)
-    {
-        m_playerAlive = false;
-        return { Event::EatenByWumpus };
-    }
-
-    return {};
 }
 
 eventvec GameModel::Replay()

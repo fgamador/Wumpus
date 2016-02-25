@@ -3,7 +3,7 @@
 #include "GameModel.h"
 #include "RandomSourceStub.h"
 
-TEST_CASE("GameModel")
+TEST_CASE("Game model")
 {
     RandomSourceStub randomSource;
     GameModel model(randomSource);
@@ -58,72 +58,70 @@ TEST_CASE("GameModel")
         }
     }
 
-    SECTION("WumpusAdjacent")
+    SECTION("Wumpus adjacent")
     {
+        model.SetPlayerRoom(2);
+
         SECTION("Adjacent")
         {
-            model.SetPlayerRoom(2);
             model.SetWumpusRoom(10);
             REQUIRE(model.WumpusAdjacent());
         }
 
         SECTION("Not adjacent")
         {
-            model.SetPlayerRoom(2);
             model.SetWumpusRoom(11);
             REQUIRE(!model.WumpusAdjacent());
         }
     }
 
-    SECTION("BatsAdjacent")
+    SECTION("Bats adjacent")
     {
+        model.SetPlayerRoom(2);
+
         SECTION("Adjacent1")
         {
-            model.SetPlayerRoom(2);
-            model.SetBatsRooms(10, 19);
+            model.SetBatRooms(10, 19);
             REQUIRE(model.BatsAdjacent());
         }
 
         SECTION("Adjacent2")
         {
-            model.SetPlayerRoom(2);
-            model.SetBatsRooms(19, 10);
+            model.SetBatRooms(19, 10);
             REQUIRE(model.BatsAdjacent());
         }
 
         SECTION("Not adjacent")
         {
-            model.SetPlayerRoom(2);
-            model.SetBatsRooms(11, 19);
+            model.SetBatRooms(11, 19);
             REQUIRE(!model.BatsAdjacent());
         }
     }
 
-    SECTION("PitAdjacent")
+    SECTION("Pit adjacent")
     {
+        model.SetPlayerRoom(2);
+
         SECTION("Adjacent1")
         {
-            model.SetPlayerRoom(2);
             model.SetPitRooms(10, 19);
             REQUIRE(model.PitAdjacent());
         }
 
         SECTION("Adjacent2")
         {
-            model.SetPlayerRoom(2);
             model.SetPitRooms(19, 10);
             REQUIRE(model.PitAdjacent());
         }
 
         SECTION("Not adjacent")
         {
-            model.SetPlayerRoom(2);
             model.SetPitRooms(11, 19);
             REQUIRE(!model.PitAdjacent());
         }
     }
 
-    SECTION("MovePlayer")
+    SECTION("Move player")
     {
         model.SetPlayerRoom(2);
 
@@ -179,9 +177,9 @@ TEST_CASE("GameModel")
             }
         }
 
-        SECTION("To bats room")
+        SECTION("To bat room")
         {
-            model.SetBatsRooms(10, 19);
+            model.SetBatRooms(10, 19);
 
             SECTION("One bat snatch")
             {
@@ -201,6 +199,48 @@ TEST_CASE("GameModel")
                     Event::BatSnatch, Event::BatSnatch
                 }));
                 REQUIRE(model.GetPlayerRoom() == 7);
+            }
+        }
+
+        SECTION("To wumpus and bat room")
+        {
+            model.SetWumpusRoom(10);
+            model.SetBatRooms(10, 19);
+
+            SECTION("Bat snatch, wumpus stays put")
+            {
+                randomSource.SetNextInts({ 5, 3 });
+                eventvec events = model.MovePlayer(10);
+                REQUIRE(events == eventvec({
+                    Event::BumpedWumpus, Event::BatSnatch
+                }));
+                REQUIRE(model.PlayerAlive());
+                REQUIRE(model.GetPlayerRoom() == 5);
+                REQUIRE(model.GetWumpusRoom() == 10);
+            }
+
+            SECTION("Bat snatch, wumpus moves elsewhere")
+            {
+                randomSource.SetNextInts({ 5, 1 });
+                eventvec events = model.MovePlayer(10);
+                REQUIRE(events == eventvec({
+                    Event::BumpedWumpus, Event::BatSnatch
+                }));
+                REQUIRE(model.PlayerAlive());
+                REQUIRE(model.GetPlayerRoom() == 5);
+                REQUIRE(model.GetWumpusRoom() == 9);
+            }
+
+            SECTION("Bat snatch, wumpus moves to player room")
+            {
+                randomSource.SetNextInts({ 9, 1 });
+                eventvec events = model.MovePlayer(10);
+                REQUIRE(events == eventvec({
+                    Event::BumpedWumpus, Event::BatSnatch, Event::EatenByWumpus
+                }));
+                REQUIRE(!model.PlayerAlive());
+                REQUIRE(model.GetPlayerRoom() == 9);
+                REQUIRE(model.GetWumpusRoom() == 9);
             }
         }
 
