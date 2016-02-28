@@ -21,7 +21,7 @@ public:
 
     GameModel(IRandomSource& randomSource);
 
-    eventvec RandomInit();
+    eventvec RandomPlacements();
     void SetPlayerRoom(int room);
     void SetWumpusRoom(int room);
     void SetBatRooms(int room1, int room2);
@@ -43,11 +43,14 @@ public:
     int GetWumpusRoom() const;
     ints2 GetBatRooms() const;
     ints2 GetPitRooms() const;
+    int GetArrowsRemaining() const;
+    int GetArrowMovesRemaining() const;
 
 private:
+    void Init();
     void ValidateMovePlayer(int room);
     eventvec PlacePlayer(int room);
-    eventvec BumpedWumpusThenBatSnatch();
+    eventvec BumpedWumpusInBatRoom();
     eventvec BumpedWumpusInPitRoom();
     eventvec BumpedWumpus();
     eventvec BatSnatch();
@@ -64,14 +67,14 @@ private:
     int m_initialPlayerRoom;
     int m_initialWumpusRoom;
 
-    bool m_playerAlive = true;
-    bool m_wumpusAlive = true;
+    bool m_playerAlive;
+    bool m_wumpusAlive;
     int m_playerRoom;
     int m_wumpusRoom;
     ints2 m_batRooms;
     ints2 m_pitRooms;
-    int m_arrowsRemaining = MaxArrows;
-    int m_arrowMovesRemaining = 0;
+    int m_arrowsRemaining;
+    int m_arrowMovesRemaining;
     int m_arrowRoom;
     int m_prevArrowRoom;
 };

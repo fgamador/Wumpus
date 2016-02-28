@@ -381,6 +381,11 @@ TEST_CASE("CommandInterpreter")
             RequireNextMoveOutput(output, { Msg::Missed });
         }
 
+        SECTION("Miss with last arrow")
+        {
+            // TODO lose game
+        }
+
         SECTION("Full path, hit")
         {
             interp.Input("10");

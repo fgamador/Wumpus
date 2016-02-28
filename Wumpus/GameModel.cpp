@@ -7,14 +7,38 @@ namespace
         if (room < 1 || room > 20)
             throw NoSuchRoomException();
     }
+
+    eventvec Append(const eventvec& events1, const eventvec& events2)
+    {
+        eventvec events = events1;
+        events.insert(events.end(), events2.begin(), events2.end());
+        return events;
+    }
+
+    eventvec Append(const eventvec& events1, const eventvec& events2, const eventvec& events3)
+    {
+        eventvec events = events1;
+        events.insert(events.end(), events2.begin(), events2.end());
+        events.insert(events.end(), events3.begin(), events3.end());
+        return events;
+    }
 }
 
 GameModel::GameModel(IRandomSource& randomSource)
     : m_randomSource(&randomSource)
 {
+    Init();
 }
 
-eventvec GameModel::RandomInit()
+void GameModel::Init()
+{
+    m_playerAlive = true;
+    m_wumpusRoom = true;
+    m_arrowsRemaining = MaxArrows;
+    m_arrowMovesRemaining = 0;
+}
+
+eventvec GameModel::RandomPlacements()
 {
     m_initialPlayerRoom = m_randomSource->NextInt(1, 20);
     m_wumpusRoom = m_initialWumpusRoom = m_randomSource->NextInt(1, 20);
@@ -75,7 +99,7 @@ eventvec GameModel::PlacePlayer(int room)
     bool inPitRoom = (m_playerRoom == m_pitRooms[0] || m_playerRoom == m_pitRooms[1]);
 
     if (inWumpusRoom && inBatRoom)
-        return BumpedWumpusThenBatSnatch();
+        return BumpedWumpusInBatRoom();
 
     if (inWumpusRoom && inPitRoom)
         return BumpedWumpusInPitRoom();
@@ -92,32 +116,24 @@ eventvec GameModel::PlacePlayer(int room)
     return {};
 }
 
-eventvec GameModel::BumpedWumpusThenBatSnatch()
+eventvec GameModel::BumpedWumpusInBatRoom()
 {
-    eventvec events = { Event::BumpedWumpus };
     eventvec snatchEvents = BatSnatch();
-    events.insert(events.end(), snatchEvents.begin(), snatchEvents.end());
     eventvec moveEvents = MoveWumpus();
-    events.insert(events.end(), moveEvents.begin(), moveEvents.end());
-    return events;
+    return Append({ Event::BumpedWumpus }, snatchEvents, moveEvents);
 }
 
 eventvec GameModel::BumpedWumpusInPitRoom()
 {
     eventvec events = BumpedWumpus();
     if (PlayerAlive())
-    {
-        eventvec pitEvents = FellInPit();
-        events.insert(events.end(), pitEvents.begin(), pitEvents.end());
-    }
+        events = Append(events, FellInPit());
     return events;
 }
 
 eventvec GameModel::BumpedWumpus()
 {
-    eventvec events = MoveWumpus();
-    events.insert(events.begin(), Event::BumpedWumpus);
-    return events;
+    return Append({ Event::BumpedWumpus }, MoveWumpus());
 }
 
 eventvec GameModel::MoveWumpus()
@@ -138,9 +154,7 @@ eventvec GameModel::MoveWumpus()
 
 eventvec GameModel::BatSnatch()
 {
-    eventvec events = PlacePlayer(m_randomSource->NextInt(1, 20));
-    events.insert(events.begin(), Event::BatSnatch);
-    return events;
+    return Append({ Event::BatSnatch }, PlacePlayer(m_randomSource->NextInt(1, 20)));
 }
 
 eventvec GameModel::FellInPit()
@@ -197,37 +211,31 @@ void GameModel::ValidateMoveArrow(int room)
 eventvec GameModel::ShotSelf()
 {
     m_playerAlive = false;
-    m_arrowMovesRemaining = 0; // TODO test
-    return{ Event::ShotSelf };
+    return { Event::ShotSelf };
 }
 
 eventvec GameModel::ShotWumpus()
 {
     m_wumpusAlive = false;
-    m_arrowMovesRemaining = 0;
     return { Event::KilledWumpus };
 }
 
 eventvec GameModel::MissedWumpus()
 {
-    eventvec events = MoveWumpus();
-    events.insert(events.begin(), Event::MissedWumpus);
-    return events;
+    return Append({ Event::MissedWumpus }, MoveWumpus());
 }
 
 eventvec GameModel::Replay()
 {
-    m_playerAlive = true;
+    Init();
     m_wumpusRoom = m_initialWumpusRoom;
-    m_arrowsRemaining = MaxArrows; // TODO test
     return PlacePlayer(m_initialPlayerRoom);
 }
 
 eventvec GameModel::Restart()
 {
-    m_playerAlive = true;
-    m_arrowsRemaining = MaxArrows; // TODO test
-    return RandomInit();
+    Init();
+    return RandomPlacements();
 }
 
 bool GameModel::PlayerAlive() const
@@ -278,4 +286,14 @@ ints2 GameModel::GetBatRooms() const
 ints2 GameModel::GetPitRooms() const
 {
     return m_pitRooms;
+}
+
+int GameModel::GetArrowsRemaining() const
+{
+    return m_arrowsRemaining;
+}
+
+int GameModel::GetArrowMovesRemaining() const
+{
+    return m_arrowMovesRemaining;
 }

@@ -18,7 +18,7 @@ int RunGame()
     GameModel model(randomSource);
     CommandInterpreter interp(model, model);
 
-    model.RandomInit();
+    model.RandomPlacements();
     interp.Run(cin, cout);
     return 0;
 }
