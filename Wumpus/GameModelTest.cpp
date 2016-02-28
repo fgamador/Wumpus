@@ -47,73 +47,6 @@ TEST_CASE("Game model")
         }
     }
 
-    SECTION("Start over")
-    {
-        randomSource.SetNextInts({ 2, 11 });
-        model.RandomPlacements();
-        model.SetWumpusRoom(10);
-        model.MovePlayer(10);
-
-        SECTION("Replay")
-        {
-            randomSource.SetNextInts({ 9, 3 });
-            eventvec events = model.Replay();
-            REQUIRE(events.empty());
-            REQUIRE(model.PlayerAlive());
-            REQUIRE(model.GetPlayerRoom() == 2);
-            REQUIRE(model.GetWumpusRoom() == 11);
-        }
-
-        SECTION("Replay restores arrows")
-        {
-            model.PrepareArrow(1);
-            model.Replay();
-            REQUIRE(model.GetArrowsRemaining() == GameModel::MaxArrows);
-            REQUIRE(model.GetArrowMovesRemaining() == 0);
-        }
-
-        SECTION("Restart")
-        {
-            randomSource.SetNextInts({ 9, 3 });
-            eventvec events = model.Restart();
-            REQUIRE(events.empty());
-            REQUIRE(model.PlayerAlive());
-            REQUIRE(model.GetPlayerRoom() == 9);
-            REQUIRE(model.GetWumpusRoom() == 3);
-        }
-
-        SECTION("Restart in wumpus room")
-        {
-            randomSource.SetNextInts({ 9, 9 });
-            eventvec events = model.Restart();
-            REQUIRE(events == eventvec({
-                Event::BumpedWumpus, Event::EatenByWumpus
-            }));
-            REQUIRE(!model.PlayerAlive());
-        }
-
-        SECTION("Restart restores arrows")
-        {
-            model.PrepareArrow(1);
-            randomSource.SetNextInts({ 9, 3 });
-            model.Restart();
-            REQUIRE(model.GetArrowsRemaining() == GameModel::MaxArrows);
-            REQUIRE(model.GetArrowMovesRemaining() == 0);
-        }
-    }
-
-    SECTION("Replay after bad start")
-    {
-        randomSource.SetNextInts({ 2, 2 });
-        model.RandomPlacements();
-        randomSource.SetNextInts({ 9, 3 });
-        eventvec events = model.Replay();
-        REQUIRE(events == eventvec({
-            Event::BumpedWumpus, Event::EatenByWumpus
-        }));
-        REQUIRE(!model.PlayerAlive());
-    }
-
     SECTION("Wumpus adjacent")
     {
         model.SetPlayerRoom(2);
@@ -287,7 +220,7 @@ TEST_CASE("Game model")
                 REQUIRE(model.GetWumpusRoom() == 9);
             }
 
-            SECTION("Bat snatch, wumpus moves to player room")
+            SECTION("Bat snatch, wumpus moves to player")
             {
                 randomSource.SetNextInts({ 9, 1 });
                 eventvec events = model.MovePlayer(10);
@@ -295,8 +228,17 @@ TEST_CASE("Game model")
                     Event::BumpedWumpus, Event::BatSnatch, Event::EatenByWumpus
                 }));
                 REQUIRE(!model.PlayerAlive());
-                REQUIRE(model.GetPlayerRoom() == 9);
-                REQUIRE(model.GetWumpusRoom() == 9);
+            }
+
+            SECTION("Bat snatch to pit room, wumpus tries to move to pit room")
+            {
+                model.SetPitRooms(9, 20);
+                randomSource.SetNextInts({ 9, 1 });
+                eventvec events = model.MovePlayer(10);
+                REQUIRE(events == eventvec({
+                    Event::BumpedWumpus, Event::BatSnatch, Event::FellInPit
+                }));
+                REQUIRE(!model.PlayerAlive());
             }
         }
 
@@ -438,14 +380,6 @@ TEST_CASE("Game model")
             REQUIRE(!model.WumpusAlive());
         }
 
-        //SECTION("Killing wumpus ends path")
-        //{
-        //    model.SetWumpusRoom(10);
-        //    model.PrepareArrow(2);
-        //    model.MoveArrow(10);
-        //    REQUIRE_THROWS_AS(model.MoveArrow(11), ArrowPathLengthException);
-        //}
-
         SECTION("Wumpus move after miss")
         {
             randomSource.SetNextInts({ 1 });
@@ -489,5 +423,72 @@ TEST_CASE("Game model")
             }));
             REQUIRE(!model.PlayerAlive());
         }
+    }
+
+    SECTION("Start over")
+    {
+        randomSource.SetNextInts({ 2, 11 });
+        model.RandomPlacements();
+        model.SetWumpusRoom(10);
+        model.MovePlayer(10);
+
+        SECTION("Replay")
+        {
+            randomSource.SetNextInts({ 9, 3 });
+            eventvec events = model.Replay();
+            REQUIRE(events.empty());
+            REQUIRE(model.PlayerAlive());
+            REQUIRE(model.GetPlayerRoom() == 2);
+            REQUIRE(model.GetWumpusRoom() == 11);
+        }
+
+        SECTION("Replay restores arrows")
+        {
+            model.PrepareArrow(1);
+            model.Replay();
+            REQUIRE(model.GetArrowsRemaining() == GameModel::MaxArrows);
+            REQUIRE(model.GetArrowMovesRemaining() == 0);
+        }
+
+        SECTION("Restart")
+        {
+            randomSource.SetNextInts({ 9, 3 });
+            eventvec events = model.Restart();
+            REQUIRE(events.empty());
+            REQUIRE(model.PlayerAlive());
+            REQUIRE(model.GetPlayerRoom() == 9);
+            REQUIRE(model.GetWumpusRoom() == 3);
+        }
+
+        SECTION("Restart in wumpus room")
+        {
+            randomSource.SetNextInts({ 9, 9 });
+            eventvec events = model.Restart();
+            REQUIRE(events == eventvec({
+                Event::BumpedWumpus, Event::EatenByWumpus
+            }));
+            REQUIRE(!model.PlayerAlive());
+        }
+
+        SECTION("Restart restores arrows")
+        {
+            model.PrepareArrow(1);
+            randomSource.SetNextInts({ 9, 3 });
+            model.Restart();
+            REQUIRE(model.GetArrowsRemaining() == GameModel::MaxArrows);
+            REQUIRE(model.GetArrowMovesRemaining() == 0);
+        }
+    }
+
+    SECTION("Replay after bad start")
+    {
+        randomSource.SetNextInts({ 2, 2 });
+        model.RandomPlacements();
+        randomSource.SetNextInts({ 9, 3 });
+        eventvec events = model.Replay();
+        REQUIRE(events == eventvec({
+            Event::BumpedWumpus, Event::EatenByWumpus
+        }));
+        REQUIRE(!model.PlayerAlive());
     }
 }

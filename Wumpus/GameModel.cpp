@@ -14,14 +14,6 @@ namespace
         events.insert(events.end(), events2.begin(), events2.end());
         return events;
     }
-
-    eventvec Append(const eventvec& events1, const eventvec& events2, const eventvec& events3)
-    {
-        eventvec events = events1;
-        events.insert(events.end(), events2.begin(), events2.end());
-        events.insert(events.end(), events3.begin(), events3.end());
-        return events;
-    }
 }
 
 GameModel::GameModel(IRandomSource& randomSource)
@@ -118,17 +110,20 @@ eventvec GameModel::PlacePlayer(int room)
 
 eventvec GameModel::BumpedWumpusInBatRoom()
 {
-    eventvec snatchEvents = BatSnatch();
-    eventvec moveEvents = MoveWumpus();
-    return Append({ Event::BumpedWumpus }, snatchEvents, moveEvents);
+    eventvec events = Append({ Event::BumpedWumpus }, BatSnatch());
+    if (!m_playerAlive)
+        return events;
+
+    return Append(events, MoveWumpus());
 }
 
 eventvec GameModel::BumpedWumpusInPitRoom()
 {
     eventvec events = BumpedWumpus();
-    if (PlayerAlive())
-        events = Append(events, FellInPit());
-    return events;
+    if (!m_playerAlive)
+        return events;
+
+    return Append(events, FellInPit());
 }
 
 eventvec GameModel::BumpedWumpus()
