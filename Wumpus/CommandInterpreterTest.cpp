@@ -182,6 +182,10 @@ TEST_CASE("CommandInterpreter")
         RequireNextMoveOutput(output, { Msg::HuntTheWumpus, "", Msg::FeelDraft });
     }
 
+    SECTION("Initial state, random init")
+    {
+        // TODO
+    }
     // TODO SECTION("Initial state, with wumpus)
     // TODO SECTION("Initial state, with bats)
     // TODO SECTION("Initial state, with pit)
@@ -386,6 +390,7 @@ TEST_CASE("CommandInterpreter")
             strvec output = interp.Input("12");
             RequireCommands(commands, { "MoveArrow 10", "MoveArrow 11", "MoveArrow 12" });
             RequireOutput(output, { Msg::GotTheWumpus, Msg::GetYouNextTime });
+            // TODO Exit msg
         }
     }
 
@@ -417,6 +422,8 @@ TEST_CASE("CommandInterpreter")
             RequireCommands(commands, { "Replay" });
             RequireNextMoveOutput(output, { Msg::HuntTheWumpus, "" });
         }
+
+        // TODO replay, restart in wumpus room
 
         SECTION("N input")
         {

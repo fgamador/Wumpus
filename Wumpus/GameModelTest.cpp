@@ -10,12 +10,26 @@ TEST_CASE("Game model")
 
     SECTION("Random init")
     {
-        randomSource.SetNextInts({ 2, 11, 5, 16, 7, 9 });
-        model.RandomInit();
-        REQUIRE(model.GetPlayerRoom() == 2);
-        REQUIRE(model.GetWumpusRoom() == 11);
-        REQUIRE(model.GetBatRooms() == ints2({ 5, 16 }));
-        REQUIRE(model.GetPitRooms() == ints2({ 7, 9 }));
+        SECTION("No conflicts")
+        {
+            randomSource.SetNextInts({ 2, 11, 5, 16, 7, 9 });
+            eventvec events = model.RandomInit();
+            REQUIRE(events.empty());
+            REQUIRE(model.GetPlayerRoom() == 2);
+            REQUIRE(model.GetWumpusRoom() == 11);
+            REQUIRE(model.GetBatRooms() == ints2({ 5, 16 }));
+            REQUIRE(model.GetPitRooms() == ints2({ 7, 9 }));
+        }
+
+        SECTION("Start in wumpus room")
+        {
+            randomSource.SetNextInts({ 2, 2, 5, 16, 7, 9, 3 });
+            eventvec events = model.RandomInit();
+            REQUIRE(events == eventvec({
+                Event::BumpedWumpus, Event::EatenByWumpus
+            }));
+            REQUIRE(!model.PlayerAlive());
+        }
     }
 
     SECTION("SetPlayerRoom")
@@ -39,11 +53,12 @@ TEST_CASE("Game model")
         model.RandomInit();
         model.SetWumpusRoom(10);
         model.MovePlayer(10);
-        randomSource.SetNextInts({ 9, 3 });
 
         SECTION("Replay")
         {
-            model.Replay();
+            randomSource.SetNextInts({ 9, 3 });
+            eventvec events = model.Replay();
+            REQUIRE(events.empty());
             REQUIRE(model.PlayerAlive());
             REQUIRE(model.GetPlayerRoom() == 2);
             REQUIRE(model.GetWumpusRoom() == 11);
@@ -51,11 +66,35 @@ TEST_CASE("Game model")
 
         SECTION("Restart")
         {
-            model.Restart();
+            randomSource.SetNextInts({ 9, 3 });
+            eventvec events = model.Restart();
+            REQUIRE(events.empty());
             REQUIRE(model.PlayerAlive());
             REQUIRE(model.GetPlayerRoom() == 9);
             REQUIRE(model.GetWumpusRoom() == 3);
         }
+
+        SECTION("Restart in wumpus room")
+        {
+            randomSource.SetNextInts({ 9, 9 });
+            eventvec events = model.Restart();
+            REQUIRE(events == eventvec({
+                Event::BumpedWumpus, Event::EatenByWumpus
+            }));
+            REQUIRE(!model.PlayerAlive());
+        }
+    }
+
+    SECTION("Replay after bad start")
+    {
+        randomSource.SetNextInts({ 2, 2 });
+        model.RandomInit();
+        randomSource.SetNextInts({ 9, 3 });
+        eventvec events = model.Replay();
+        REQUIRE(events == eventvec({
+            Event::BumpedWumpus, Event::EatenByWumpus
+        }));
+        REQUIRE(!model.PlayerAlive());
     }
 
     SECTION("Wumpus adjacent")

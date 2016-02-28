@@ -17,7 +17,7 @@ class GameModel : public GameCommands, public PlayerState
 public:
     GameModel(IRandomSource& randomSource);
 
-    void RandomInit();
+    eventvec RandomInit();
     void SetPlayerRoom(int room);
     void SetWumpusRoom(int room);
     void SetBatRooms(int room1, int room2);

@@ -14,15 +14,15 @@ GameModel::GameModel(IRandomSource& randomSource)
 {
 }
 
-void GameModel::RandomInit()
+eventvec GameModel::RandomInit()
 {
-    m_playerRoom = m_initialPlayerRoom = m_randomSource->NextInt(1, 20);
+    m_initialPlayerRoom = m_randomSource->NextInt(1, 20);
     m_wumpusRoom = m_initialWumpusRoom = m_randomSource->NextInt(1, 20);
     m_batRooms[0] = m_randomSource->NextInt(1, 20);
     m_batRooms[1] = m_randomSource->NextInt(1, 20);
     m_pitRooms[0] = m_randomSource->NextInt(1, 20);
     m_pitRooms[1] = m_randomSource->NextInt(1, 20);
-    // TODO check for initial events?
+    return PlacePlayer(m_initialPlayerRoom);
 }
 
 void GameModel::SetPlayerRoom(int room)
@@ -213,18 +213,14 @@ eventvec GameModel::MissedWumpus()
 eventvec GameModel::Replay()
 {
     m_playerAlive = true;
-    m_playerRoom = m_initialPlayerRoom;
     m_wumpusRoom = m_initialWumpusRoom;
-    // TODO check for initial events
-    return {};
+    return PlacePlayer(m_initialPlayerRoom);
 }
 
 eventvec GameModel::Restart()
 {
     m_playerAlive = true;
-    RandomInit();
-    // TODO check for initial events
-    return {};
+    return RandomInit();
 }
 
 bool GameModel::PlayerAlive() const
