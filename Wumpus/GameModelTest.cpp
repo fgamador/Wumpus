@@ -266,6 +266,44 @@ TEST_CASE("Game model")
                 REQUIRE(!model.PlayerAlive());
             }
         }
+
+        SECTION("To wumpus and pit room")
+        {
+            model.SetWumpusRoom(10);
+            model.SetPitRooms(10, 3);
+
+            SECTION("Wumpus stays put")
+            {
+                randomSource.SetNextInts({ 3 });
+                eventvec events = model.MovePlayer(10);
+                REQUIRE(events == eventvec({
+                    Event::BumpedWumpus, Event::EatenByWumpus
+                }));
+                REQUIRE(!model.PlayerAlive());
+            }
+
+            SECTION("Wumpus moves elsewhere")
+            {
+                randomSource.SetNextInts({ 1 });
+                eventvec events = model.MovePlayer(10);
+                REQUIRE(events == eventvec({
+                    Event::BumpedWumpus, Event::FellInPit
+                }));
+                REQUIRE(!model.PlayerAlive());
+            }
+        }
+
+        SECTION("To bat and pit room")
+        {
+            model.SetBatRooms(10, 19);
+            model.SetPitRooms(10, 19);
+            randomSource.SetNextInts({ 5 });
+            eventvec events = model.MovePlayer(10);
+            REQUIRE(events == eventvec({
+                Event::BatSnatch
+            }));
+            REQUIRE(model.GetPlayerRoom() == 5);
+        }
     }
 
     SECTION("Crooked arrow")

@@ -75,14 +75,10 @@ eventvec GameModel::PlacePlayer(int room)
     bool inPitRoom = (m_playerRoom == m_pitRooms[0] || m_playerRoom == m_pitRooms[1]);
 
     if (inWumpusRoom && inBatRoom)
-    {
-        eventvec events = { Event::BumpedWumpus };
-        eventvec snatchEvents = BatSnatch();
-        eventvec bumpEvents = BumpedWumpus();
-        events.insert(events.end(), snatchEvents.begin(), snatchEvents.end());
-        events.insert(events.end(), bumpEvents.begin() + 1, bumpEvents.end());
-        return events;
-    }
+        return BumpedWumpusThenBatSnatch();
+
+    if (inWumpusRoom && inPitRoom)
+        return BumpedWumpusInPitRoom();
 
     if (inWumpusRoom)
         return BumpedWumpus();
@@ -94,6 +90,27 @@ eventvec GameModel::PlacePlayer(int room)
         return FellInPit();
 
     return {};
+}
+
+eventvec GameModel::BumpedWumpusThenBatSnatch()
+{
+    eventvec events = { Event::BumpedWumpus };
+    eventvec snatchEvents = BatSnatch();
+    events.insert(events.end(), snatchEvents.begin(), snatchEvents.end());
+    eventvec moveEvents = MoveWumpus();
+    events.insert(events.end(), moveEvents.begin(), moveEvents.end());
+    return events;
+}
+
+eventvec GameModel::BumpedWumpusInPitRoom()
+{
+    eventvec events = BumpedWumpus();
+    if (PlayerAlive())
+    {
+        eventvec pitEvents = FellInPit();
+        events.insert(events.end(), pitEvents.begin(), pitEvents.end());
+    }
+    return events;
 }
 
 eventvec GameModel::BumpedWumpus()
@@ -116,7 +133,7 @@ eventvec GameModel::MoveWumpus()
         return { Event::EatenByWumpus };
     }
 
-    return{};
+    return {};
 }
 
 eventvec GameModel::BatSnatch()

@@ -269,6 +269,12 @@ void CommandInterpreter::AwaitingArrowRoomState::Input(string input, CommandInte
         OutputStandardMessage(interp);
         return;
     }
+    catch (const ArrowDoubleBackException&)
+    {
+        interp.Output(Msg::NotThatCrooked);
+        OutputStandardMessage(interp);
+        return;
+    }
 }
 
 void CommandInterpreter::AwaitingArrowRoomState::OutputStandardMessage(CommandInterpreter& interp) const

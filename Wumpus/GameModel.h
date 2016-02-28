@@ -43,6 +43,8 @@ public:
 private:
     void ValidateMovePlayer(int room);
     eventvec PlacePlayer(int room);
+    eventvec BumpedWumpusThenBatSnatch();
+    eventvec BumpedWumpusInPitRoom();
     eventvec BumpedWumpus();
     eventvec BatSnatch();
     eventvec FellInPit();

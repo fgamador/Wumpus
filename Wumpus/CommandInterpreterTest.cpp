@@ -27,8 +27,6 @@ public:
     {
         if (willThrowArrowPathLengthException)
             throw ArrowPathLengthException();
-        if (willThrowArrowDoubleBackException)
-            throw ArrowDoubleBackException();
 
         invoked.push_back("PrepareArrow " + to_string(numRooms));
         events.clear();
@@ -36,6 +34,11 @@ public:
 
     eventvec MoveArrow(int room) override
     {
+        if (willThrowArrowDoubleBackException)
+            throw ArrowDoubleBackException();
+        if (willThrowArrowPathLengthException)
+            throw ArrowPathLengthException();
+
         invoked.push_back("MoveArrow " + to_string(room));
         return PostClearEvents();
     }
@@ -347,6 +350,14 @@ TEST_CASE("CommandInterpreter")
             strvec output = interp.Input("X");
             RequireCommands(commands, {});
             RequireOutput(output, { Msg::Huh, Msg::RoomNumber });
+        }
+
+        SECTION("Double back")
+        {
+            commands.willThrowArrowDoubleBackException = true;
+            strvec output = interp.Input("6");
+            RequireCommands(commands, {});
+            RequireOutput(output, { Msg::NotThatCrooked, Msg::RoomNumber });
         }
 
         SECTION("Valid input")
