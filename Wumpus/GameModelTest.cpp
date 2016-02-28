@@ -355,6 +355,23 @@ TEST_CASE("Game model")
             REQUIRE_THROWS_AS(model.PrepareArrow(6), ArrowPathLengthException);
         }
 
+        SECTION("Arrow already prepared")
+        {
+            model.PrepareArrow(1);
+            REQUIRE_THROWS_AS(model.PrepareArrow(1), ArrowAlreadyPreparedException);
+        }
+
+        SECTION("Out of arrows")
+        {
+            model.SetWumpusRoom(20);
+            for (int i = 0; i < GameModel::MaxArrows; ++i)
+            {
+                model.PrepareArrow(1);
+                model.MoveArrow(10);
+            }
+            REQUIRE_THROWS_AS(model.PrepareArrow(1), OutOfArrowsException);
+        }
+
         SECTION("Move without Prepare")
         {
             REQUIRE_THROWS_AS(model.MoveArrow(10), ArrowPathLengthException);

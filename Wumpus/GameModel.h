@@ -1,11 +1,13 @@
 #pragma once
 
+#include "ArrowAlreadyPreparedException.h"
 #include "ArrowDoubleBackException.h"
 #include "ArrowPathLengthException.h"
 #include "Event.h"
 #include "GameCommands.h"
 #include "GameMap.h"
 #include "IRandomSource.h"
+#include "OutOfArrowsException.h"
 #include "PlayerState.h"
 #include "PlayerDeadException.h"
 #include "RoomsNotConnectedException.h"
@@ -15,6 +17,8 @@ typedef array<int, 2> ints2;
 class GameModel : public GameCommands, public PlayerState
 {
 public:
+    static const int MaxArrows = 5;
+
     GameModel(IRandomSource& randomSource);
 
     eventvec RandomInit();
@@ -66,6 +70,7 @@ private:
     int m_wumpusRoom;
     ints2 m_batRooms;
     ints2 m_pitRooms;
+    int m_arrowsRemaining = MaxArrows;
     int m_arrowMovesRemaining = 0;
     int m_arrowRoom;
     int m_prevArrowRoom;

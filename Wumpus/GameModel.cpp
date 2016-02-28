@@ -151,9 +151,14 @@ eventvec GameModel::FellInPit()
 
 void GameModel::PrepareArrow(int pathLength)
 {
+    if (m_arrowMovesRemaining > 0)
+        throw ArrowAlreadyPreparedException();
+    if (m_arrowsRemaining == 0)
+        throw OutOfArrowsException();
     if (pathLength < 1 || pathLength > 5)
         throw ArrowPathLengthException();
 
+    m_arrowsRemaining--;
     m_arrowMovesRemaining = pathLength;
     m_arrowRoom = m_prevArrowRoom = m_playerRoom;
 }
@@ -214,12 +219,14 @@ eventvec GameModel::Replay()
 {
     m_playerAlive = true;
     m_wumpusRoom = m_initialWumpusRoom;
+    m_arrowsRemaining = MaxArrows; // TODO test
     return PlacePlayer(m_initialPlayerRoom);
 }
 
 eventvec GameModel::Restart()
 {
     m_playerAlive = true;
+    m_arrowsRemaining = MaxArrows; // TODO test
     return RandomInit();
 }
 

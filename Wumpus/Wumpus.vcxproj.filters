@@ -66,6 +66,12 @@
     <ClInclude Include="ArrowDoubleBackException.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="OutOfArrowsException.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ArrowAlreadyPreparedException.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CommandInterpreter.cpp">

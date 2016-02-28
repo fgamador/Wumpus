@@ -76,6 +76,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="ArrowAlreadyPreparedException.h" />
     <ClInclude Include="ArrowDoubleBackException.h" />
     <ClInclude Include="ArrowPathLengthException.h" />
     <ClInclude Include="catch.hpp" />
@@ -88,6 +89,7 @@
     <ClInclude Include="IRandomSource.h" />
     <ClInclude Include="Msg.h" />
     <ClInclude Include="NoSuchRoomException.h" />
+    <ClInclude Include="OutOfArrowsException.h" />
     <ClInclude Include="PlayerDeadException.h" />
     <ClInclude Include="PlayerState.h" />
     <ClInclude Include="RandomSource.h" />
