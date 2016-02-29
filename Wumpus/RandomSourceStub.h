@@ -1,13 +1,13 @@
 #pragma once
 
-#include "IRandomSource.h"
+#include "RandomSource.h"
 #include <vector>
 
 using namespace std;
 
 typedef vector<int> intvec;
 
-class RandomSourceStub : public IRandomSource
+class RandomSourceStub : public RandomSource
 {
 public:
     int NextInt(int from, int to) override

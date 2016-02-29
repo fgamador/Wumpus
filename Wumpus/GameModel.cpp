@@ -16,7 +16,7 @@ namespace
     }
 }
 
-GameModel::GameModel(IRandomSource& randomSource)
+GameModel::GameModel(RandomSource& randomSource)
     : m_randomSource(&randomSource)
 {
     Init();

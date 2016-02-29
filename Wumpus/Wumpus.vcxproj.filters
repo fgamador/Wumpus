@@ -45,13 +45,7 @@
     <ClInclude Include="Msg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="IRandomSource.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="RandomSourceStub.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RandomSource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Event.h">
@@ -70,6 +64,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ArrowAlreadyPreparedException.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SimpleRandomSource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RandomSource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -98,10 +98,10 @@
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RandomSourceTest.cpp">
+    <ClCompile Include="SimpleRandomSource.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RandomSource.cpp">
+    <ClCompile Include="SimpleRandomSourceTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -8,6 +8,7 @@ typedef vector<int> intvec;
 class GameCommands
 {
 public:
+    virtual eventvec RandomPlacements() = 0;
     virtual eventvec MovePlayer(int room) = 0;
     virtual void PrepareArrow(int pathLength) = 0;
     virtual eventvec MoveArrow(int room) = 0;

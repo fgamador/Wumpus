@@ -5,7 +5,7 @@
 
 #include "CommandInterpreter.h"
 #include "GameModel.h"
-#include "RandomSource.h"
+#include "SimpleRandomSource.h"
 
 int RunTests()
 {
@@ -14,7 +14,7 @@ int RunTests()
 
 int RunGame()
 {
-    RandomSource randomSource;
+    SimpleRandomSource randomSource;
     GameModel model(randomSource);
     CommandInterpreter interp(model, model);
 

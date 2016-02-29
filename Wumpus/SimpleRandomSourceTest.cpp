@@ -2,13 +2,13 @@
 
 #include <array>
 
-#include "RandomSource.h"
+#include "SimpleRandomSource.h"
 
 using namespace std;
 
-TEST_CASE("RandomSource", "[.]")
+TEST_CASE("SimpleRandomSource", "[.]")
 {
-    RandomSource randomSource;
+    SimpleRandomSource randomSource;
     array<int, 3> counts = { 0, 0, 0 };
     for (int i = 0; i < 1000; i++)
     {

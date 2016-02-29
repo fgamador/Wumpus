@@ -10,6 +10,12 @@
 class GameCommandsSpy : public GameCommands
 {
 public:
+    eventvec RandomPlacements() override
+    {
+        invoked.push_back("RandomPlacements");
+        return PostClearEvents();
+    }
+
     eventvec MovePlayer(int room) override
     {
         if (willThrowNoSuchRoomException)

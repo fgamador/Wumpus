@@ -6,7 +6,7 @@
 #include "Event.h"
 #include "GameCommands.h"
 #include "GameMap.h"
-#include "IRandomSource.h"
+#include "RandomSource.h"
 #include "OutOfArrowsException.h"
 #include "PlayerState.h"
 #include "PlayerDeadException.h"
@@ -19,13 +19,14 @@ class GameModel : public GameCommands, public PlayerState
 public:
     static const int MaxArrows = 5;
 
-    GameModel(IRandomSource& randomSource);
+    GameModel(RandomSource& randomSource);
 
-    eventvec RandomPlacements();
     void SetPlayerRoom(int room);
     void SetWumpusRoom(int room);
     void SetBatRooms(int room1, int room2);
     void SetPitRooms(int room1, int room2);
+
+    eventvec RandomPlacements() override;
     eventvec MovePlayer(int room) override;
     void PrepareArrow(int pathLength) override;
     eventvec MoveArrow(int room) override;
@@ -62,7 +63,7 @@ private:
     eventvec MoveWumpus();
 
 private:
-    IRandomSource* m_randomSource;
+    RandomSource* m_randomSource;
     GameMap m_map;
     int m_initialPlayerRoom;
     int m_initialWumpusRoom;
