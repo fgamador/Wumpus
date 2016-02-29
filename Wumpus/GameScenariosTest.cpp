@@ -36,7 +36,7 @@ TEST_CASE("Article full game")
 
     randomSource.SetNextInts({ 2, 16, 1, 11, 7, 8 });
 
-    auto output = interp.Input("RandomPlacements");
+    auto output = interp.Input(CommandInterpreter::RandomPlacements);
     RequireNextMoveOutput(output, { Msg::HuntTheWumpus, "", Msg::BatsNearby }, 2, { 1, 3, 10 });
 
     output = interp.Input("M");
@@ -108,5 +108,5 @@ TEST_CASE("Article full game")
     RequireOutput(output, { Msg::RoomNumber });
 
     output = interp.Input("16");
-    RequireOutput(output, { Msg::GotTheWumpus, Msg::GetYouNextTime });
+    RequireOutput(output, { Msg::GotTheWumpus, Msg::GetYouNextTime, Msg::Exit });
 }

@@ -151,6 +151,7 @@ namespace {
 
     void RequireNextMoveOutput(const strvec& output, const strvec& leadingMsgs)
     {
+        REQUIRE(output.size() >= leadingMsgs.size());
         for (unsigned i = 0; i < leadingMsgs.size(); ++i)
             REQUIRE(output[i] == leadingMsgs[i]);
         RequireNextMoveOutput(strvec(output.begin() + leadingMsgs.size(), output.end()));
@@ -196,7 +197,7 @@ TEST_CASE("CommandInterpreter")
 
     SECTION("Initial state, random init")
     {
-        auto output = interp.Input("RandomPlacements");
+        auto output = interp.Input(CommandInterpreter::RandomPlacements);
         RequireCommands(commands, { "RandomPlacements" });
         RequireNextMoveOutput(output, { Msg::HuntTheWumpus, "" });
     }
@@ -205,7 +206,7 @@ TEST_CASE("CommandInterpreter")
     {
         commands.events = { Event::BumpedWumpus, Event::EatenByWumpus };
         playerState.playerAlive = false;
-        auto output = interp.Input("RandomPlacements");
+        auto output = interp.Input(CommandInterpreter::RandomPlacements);
         RequireCommands(commands, { "RandomPlacements" });
         RequireOutput(output, { Msg::HuntTheWumpus, "", Msg::BumpedWumpus, Msg::WumpusGotYou, Msg::YouLose, Msg::SameSetup });
     }
@@ -216,28 +217,28 @@ TEST_CASE("CommandInterpreter")
 
         SECTION("Empty input")
         {
-            strvec output = interp.Input("");
+            auto output = interp.Input("");
             RequireCommands(commands, {});
             RequireOutput(output, { Msg::ShootOrMove });
         }
 
         SECTION("Unrecognized input")
         {
-            strvec output = interp.Input("X");
+            auto output = interp.Input("X");
             RequireCommands(commands, {});
             RequireOutput(output, { Msg::Huh, Msg::ShootOrMove });
         }
 
         SECTION("M input")
         {
-            strvec output = interp.Input("M");
+            auto output = interp.Input("M");
             RequireCommands(commands, {});
             RequireOutput(output, { Msg::WhereTo });
         }
 
         SECTION("S input")
         {
-            strvec output = interp.Input("S");
+            auto output = interp.Input("S");
             RequireCommands(commands, {});
             RequireOutput(output, { Msg::NumberOfRooms });
         }
@@ -250,21 +251,21 @@ TEST_CASE("CommandInterpreter")
 
         SECTION("Empty input")
         {
-            strvec output = interp.Input("");
+            auto output = interp.Input("");
             RequireCommands(commands, {});
             RequireOutput(output, { Msg::WhereTo });
         }
 
         SECTION("Unparsable input")
         {
-            strvec output = interp.Input("X");
+            auto output = interp.Input("X");
             RequireCommands(commands, {});
             RequireOutput(output, { Msg::Huh, Msg::WhereTo });
         }
 
         SECTION("Valid input")
         {
-            strvec output = interp.Input("2");
+            auto output = interp.Input("2");
             RequireCommands(commands, { "MovePlayer 2" });
             RequireNextMoveOutput(output);
         }
@@ -272,7 +273,7 @@ TEST_CASE("CommandInterpreter")
         SECTION("Room-number input, no such room")
         {
             commands.willThrowNoSuchRoomException = true;
-            strvec output = interp.Input("21");
+            auto output = interp.Input("21");
             RequireCommands(commands, {});
             RequireOutput(output, { Msg::Impossible, Msg::WhereTo });
         }
@@ -280,7 +281,7 @@ TEST_CASE("CommandInterpreter")
         SECTION("Room-number input, unconnected room")
         {
             commands.willThrowRoomsNotConnectedException = true;
-            strvec output = interp.Input("5");
+            auto output = interp.Input("5");
             RequireCommands(commands, {});
             RequireOutput(output, { Msg::Impossible, Msg::WhereTo });
         }
@@ -288,7 +289,7 @@ TEST_CASE("CommandInterpreter")
         SECTION("Bumped wumpus")
         {
             commands.events = { Event::BumpedWumpus };
-            strvec output = interp.Input("2");
+            auto output = interp.Input("2");
             RequireCommands(commands, { "MovePlayer 2" });
             RequireNextMoveOutput(output, { Msg::BumpedWumpus });
         }
@@ -297,7 +298,7 @@ TEST_CASE("CommandInterpreter")
         {
             commands.events = { Event::BumpedWumpus, Event::EatenByWumpus };
             playerState.playerAlive = false;
-            strvec output = interp.Input("2");
+            auto output = interp.Input("2");
             RequireCommands(commands, { "MovePlayer 2" });
             RequireOutput(output, { Msg::BumpedWumpus, Msg::WumpusGotYou, Msg::YouLose, Msg::SameSetup });
         }
@@ -305,7 +306,7 @@ TEST_CASE("CommandInterpreter")
         SECTION("Bat snatch")
         {
             commands.events = { Event::BatSnatch };
-            strvec output = interp.Input("2");
+            auto output = interp.Input("2");
             RequireCommands(commands, { "MovePlayer 2" });
             RequireNextMoveOutput(output, { Msg::BatSnatch });
         }
@@ -314,7 +315,7 @@ TEST_CASE("CommandInterpreter")
         {
             commands.events = { Event::FellInPit };
             playerState.playerAlive = false;
-            strvec output = interp.Input("2");
+            auto output = interp.Input("2");
             RequireCommands(commands, { "MovePlayer 2" });
             RequireOutput(output, { Msg::FellInPit, Msg::YouLose, Msg::SameSetup });
         }
@@ -327,21 +328,21 @@ TEST_CASE("CommandInterpreter")
 
         SECTION("Empty input")
         {
-            strvec output = interp.Input("");
+            auto output = interp.Input("");
             RequireCommands(commands, {});
             RequireOutput(output, { Msg::NumberOfRooms });
         }
 
         SECTION("Unparsable input")
         {
-            strvec output = interp.Input("X");
+            auto output = interp.Input("X");
             RequireCommands(commands, {});
             RequireOutput(output, { Msg::Huh, Msg::NumberOfRooms });
         }
 
         SECTION("Valid input")
         {
-            strvec output = interp.Input("2");
+            auto output = interp.Input("2");
             RequireCommands(commands, { "PrepareArrow 2" });
             RequireOutput(output, { Msg::RoomNumber });
         }
@@ -349,7 +350,7 @@ TEST_CASE("CommandInterpreter")
         SECTION("Invalid length")
         {
             commands.willThrowArrowPathLengthException = true;
-            strvec output = interp.Input("6");
+            auto output = interp.Input("6");
             RequireCommands(commands, {});
             RequireOutput(output, { Msg::Impossible, Msg::NumberOfRooms });
         }
@@ -364,14 +365,14 @@ TEST_CASE("CommandInterpreter")
 
         SECTION("Empty input")
         {
-            strvec output = interp.Input("");
+            auto output = interp.Input("");
             RequireCommands(commands, {});
             RequireOutput(output, { Msg::RoomNumber });
         }
 
         SECTION("Unparsable input")
         {
-            strvec output = interp.Input("X");
+            auto output = interp.Input("X");
             RequireCommands(commands, {});
             RequireOutput(output, { Msg::Huh, Msg::RoomNumber });
         }
@@ -379,14 +380,14 @@ TEST_CASE("CommandInterpreter")
         SECTION("Double back")
         {
             commands.willThrowArrowDoubleBackException = true;
-            strvec output = interp.Input("6");
+            auto output = interp.Input("6");
             RequireCommands(commands, {});
             RequireOutput(output, { Msg::NotThatCrooked, Msg::RoomNumber });
         }
 
         SECTION("Valid input")
         {
-            strvec output = interp.Input("10");
+            auto output = interp.Input("10");
             RequireCommands(commands, { "MoveArrow 10" });
             RequireOutput(output, { Msg::RoomNumber });
         }
@@ -396,24 +397,25 @@ TEST_CASE("CommandInterpreter")
             interp.Input("10");
             interp.Input("11");
             commands.events = { Event::MissedWumpus };
-            strvec output = interp.Input("12");
+            auto output = interp.Input("12");
             RequireCommands(commands, { "MoveArrow 10", "MoveArrow 11", "MoveArrow 12" });
             RequireNextMoveOutput(output, { Msg::Missed });
         }
 
-        //SECTION("Miss, wumpus move to player")
-        //{
-        //    commands.events = { Event::MissedWumpus };
-        //    strvec output = interp.Input("10");
-        //    RequireCommands(commands, { "MoveArrow 10" });
-        //    RequireNextMoveOutput(output, { Msg::Missed });
-        //}
+        SECTION("Miss, wumpus move to player")
+        {
+            commands.events = { Event::MissedWumpus, Event::BumpedWumpus, Event::EatenByWumpus };
+            playerState.playerAlive = false;
+            auto output = interp.Input("10");
+            RequireCommands(commands, { "MoveArrow 10" });
+            RequireOutput(output, { Msg::Missed, Msg::BumpedWumpus, Msg::WumpusGotYou, Msg::YouLose, Msg::SameSetup });
+        }
 
         SECTION("Miss with last arrow")
         {
             commands.events = { Event::MissedWumpus };
             playerState.arrowsRemaining = 0;
-            strvec output = interp.Input("10");
+            auto output = interp.Input("10");
             RequireCommands(commands, { "MoveArrow 10" });
             RequireOutput(output, { Msg::Missed, Msg::OutOfArrows, Msg::YouLose, Msg::SameSetup });
         }
@@ -424,10 +426,9 @@ TEST_CASE("CommandInterpreter")
             interp.Input("11");
             commands.events = { Event::KilledWumpus };
             playerState.wumpusAlive = false;
-            strvec output = interp.Input("12");
+            auto output = interp.Input("12");
             RequireCommands(commands, { "MoveArrow 10", "MoveArrow 11", "MoveArrow 12" });
-            RequireOutput(output, { Msg::GotTheWumpus, Msg::GetYouNextTime });
-            // TODO Exit msg
+            RequireOutput(output, { Msg::GotTheWumpus, Msg::GetYouNextTime, Msg::Exit });
         }
     }
 
@@ -441,33 +442,51 @@ TEST_CASE("CommandInterpreter")
 
         SECTION("Empty input")
         {
-            strvec output = interp.Input("");
+            auto output = interp.Input("");
             RequireCommands(commands, {});
             RequireOutput(output, { Msg::SameSetup });
         }
 
         SECTION("Unrecognized input")
         {
-            strvec output = interp.Input("X");
+            auto output = interp.Input("X");
             RequireCommands(commands, {});
             RequireOutput(output, { Msg::Huh, Msg::SameSetup });
         }
 
         SECTION("Y input")
         {
-            strvec output = interp.Input("Y");
+            auto output = interp.Input("Y");
             RequireCommands(commands, { "Replay" });
             RequireNextMoveOutput(output, { Msg::HuntTheWumpus, "" });
         }
 
-        // TODO replay, restart in wumpus room
+        // TODO
+        //SECTION("Y input, restart in wumpus room")
+        //{
+        //    commands.events = { Event::BumpedWumpus, Event::EatenByWumpus };
+        //    playerState.playerAlive = false;
+        //    auto output = interp.Input("Y");
+        //    RequireCommands(commands, { "Replay" });
+        //    RequireOutput(output, { Msg::HuntTheWumpus, "", Msg::BumpedWumpus, Msg::WumpusGotYou, Msg::YouLose, Msg::SameSetup });
+        //}
 
         SECTION("N input")
         {
-            strvec output = interp.Input("N");
+            auto output = interp.Input("N");
             RequireCommands(commands, { "Restart" });
             RequireNextMoveOutput(output, { Msg::HuntTheWumpus, "" });
         }
+
+        // TODO
+        //SECTION("N input, restart in wumpus room")
+        //{
+        //    commands.events = { Event::BumpedWumpus, Event::EatenByWumpus };
+        //    playerState.playerAlive = false;
+        //    auto output = interp.Input("N");
+        //    RequireCommands(commands, { "Restart" });
+        //    RequireOutput(output, { Msg::HuntTheWumpus, "", Msg::BumpedWumpus, Msg::WumpusGotYou, Msg::YouLose, Msg::SameSetup });
+        //}
     }
 
     SECTION("Stream I/O")

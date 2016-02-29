@@ -12,6 +12,8 @@ typedef vector<string> strvec;
 class CommandInterpreter
 {
 public:
+    static const string RandomPlacements;
+
     CommandInterpreter(GameCommands& commands, const PlayerState& playerState);
 
     void Run(istream& in, ostream& out);

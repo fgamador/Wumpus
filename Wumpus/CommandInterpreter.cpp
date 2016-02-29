@@ -4,6 +4,8 @@
 
 #include "Msg.h"
 
+const string CommandInterpreter::RandomPlacements("[RandomPlacements]");
+
 class CommandInterpreter::State
 {
 public:
@@ -95,12 +97,15 @@ CommandInterpreter::CommandInterpreter(GameCommands& commands, const PlayerState
 
 void CommandInterpreter::Run(istream& in, ostream& out)
 {
-    string input = "RandomPlacements";
+    string input = RandomPlacements;
     while (!in.eof())
     {
         strvec output = Input(input);
         for (size_t i = 0; i < output.size(); ++i)
         {
+            if (output[i] == Msg::Exit)
+                return;
+
             if (i > 0)
                 out << endl;
             out << output[i];
@@ -274,8 +279,7 @@ void CommandInterpreter::AwaitingArrowRoomState::Input(string input, CommandInte
         {
             interp.Output(Msg::GotTheWumpus);
             interp.Output(Msg::GetYouNextTime);
-            // TODO "[EXIT]"
-            //interp.SetState(AwaitingCommand);
+            interp.Output(Msg::Exit);
         }
         else if (interp.m_playerState.GetArrowsRemaining() == 0)
         {
@@ -285,7 +289,8 @@ void CommandInterpreter::AwaitingArrowRoomState::Input(string input, CommandInte
         }
         else if (!interp.m_playerState.PlayerAlive())
         {
-            // TODO wumpus moved and got you
+            interp.Output(Msg::YouLose);
+            interp.SetState(AwaitingReplay);
         }
         else
         {
