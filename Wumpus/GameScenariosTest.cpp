@@ -35,9 +35,8 @@ TEST_CASE("Article full game")
     CommandInterpreter interp(model, model);
 
     randomSource.SetNextInts({ 2, 16, 1, 11, 7, 8 });
-    model.RandomPlacements();
 
-    auto output = interp.Input("");
+    auto output = interp.Input("RandomPlacements");
     RequireNextMoveOutput(output, { Msg::HuntTheWumpus, "", Msg::BatsNearby }, 2, { 1, 3, 10 });
 
     output = interp.Input("M");

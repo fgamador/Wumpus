@@ -115,11 +115,17 @@ public:
         return wumpusAlive;
     }
 
+    int GetArrowsRemaining() const
+    {
+        return arrowsRemaining;
+    }
+
     bool playerAlive = true;
     bool wumpusAdjacent = false;
     bool batsAdjacent = false;
     bool pitAdjacent = false;
     bool wumpusAlive = true;
+    int arrowsRemaining = 5;
 };
 
 namespace {
@@ -190,11 +196,19 @@ TEST_CASE("CommandInterpreter")
 
     SECTION("Initial state, random init")
     {
-        // TODO
+        auto output = interp.Input("RandomPlacements");
+        RequireCommands(commands, { "RandomPlacements" });
+        RequireNextMoveOutput(output, { Msg::HuntTheWumpus, "" });
     }
-    // TODO SECTION("Initial state, with wumpus)
-    // TODO SECTION("Initial state, with bats)
-    // TODO SECTION("Initial state, with pit)
+
+    SECTION("Initial state, random init, in wumpus room")
+    {
+        commands.events = { Event::BumpedWumpus, Event::EatenByWumpus };
+        playerState.playerAlive = false;
+        auto output = interp.Input("RandomPlacements");
+        RequireCommands(commands, { "RandomPlacements" });
+        RequireOutput(output, { Msg::HuntTheWumpus, "", Msg::BumpedWumpus, Msg::WumpusGotYou, Msg::YouLose, Msg::SameSetup });
+    }
 
     SECTION("Awaiting command")
     {
@@ -387,9 +401,21 @@ TEST_CASE("CommandInterpreter")
             RequireNextMoveOutput(output, { Msg::Missed });
         }
 
+        //SECTION("Miss, wumpus move to player")
+        //{
+        //    commands.events = { Event::MissedWumpus };
+        //    strvec output = interp.Input("10");
+        //    RequireCommands(commands, { "MoveArrow 10" });
+        //    RequireNextMoveOutput(output, { Msg::Missed });
+        //}
+
         SECTION("Miss with last arrow")
         {
-            // TODO lose game
+            commands.events = { Event::MissedWumpus };
+            playerState.arrowsRemaining = 0;
+            strvec output = interp.Input("10");
+            RequireCommands(commands, { "MoveArrow 10" });
+            RequireOutput(output, { Msg::Missed, Msg::OutOfArrows, Msg::YouLose, Msg::SameSetup });
         }
 
         SECTION("Full path, hit")

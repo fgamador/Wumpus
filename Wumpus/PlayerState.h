@@ -16,4 +16,5 @@ public:
     virtual bool BatsAdjacent() const = 0;
     virtual bool PitAdjacent() const = 0;
     virtual bool WumpusAlive() const = 0;
+    virtual int GetArrowsRemaining() const = 0;
 };

@@ -40,11 +40,11 @@ public:
     bool BatsAdjacent() const override;
     bool PitAdjacent() const override;
     bool WumpusAlive() const override;
+    int GetArrowsRemaining() const override;
 
     int GetWumpusRoom() const;
     ints2 GetBatRooms() const;
     ints2 GetPitRooms() const;
-    int GetArrowsRemaining() const;
     int GetArrowMovesRemaining() const;
 
 private:

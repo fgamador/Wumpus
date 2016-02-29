@@ -95,7 +95,7 @@ CommandInterpreter::CommandInterpreter(GameCommands& commands, const PlayerState
 
 void CommandInterpreter::Run(istream& in, ostream& out)
 {
-    string input;
+    string input = "RandomPlacements";
     while (!in.eof())
     {
         strvec output = Input(input);
@@ -123,8 +123,27 @@ void CommandInterpreter::InitialState::Input(string input, CommandInterpreter& i
 {
     interp.Output(Msg::HuntTheWumpus);
     interp.Output("");
-    OutputStandardMessage(interp);
-    interp.SetState(AwaitingCommand);
+
+    if (input == "")
+    {
+        OutputStandardMessage(interp);
+        interp.SetState(AwaitingCommand);
+        return;
+    }
+
+    eventvec events = interp.m_commands.RandomPlacements();
+    OutputEvents(events, interp);
+
+    if (interp.m_playerState.PlayerAlive())
+    {
+        OutputStandardMessage(interp);
+        interp.SetState(AwaitingCommand);
+    }
+    else
+    {
+        interp.Output(Msg::YouLose);
+        interp.SetState(AwaitingReplay);
+    }
 }
 
 void CommandInterpreter::InitialState::OutputStandardMessage(CommandInterpreter& interp) const
@@ -255,9 +274,20 @@ void CommandInterpreter::AwaitingArrowRoomState::Input(string input, CommandInte
         {
             interp.Output(Msg::GotTheWumpus);
             interp.Output(Msg::GetYouNextTime);
+            // TODO "[EXIT]"
             //interp.SetState(AwaitingCommand);
         }
-        else if (interp.m_playerState.PlayerAlive())
+        else if (interp.m_playerState.GetArrowsRemaining() == 0)
+        {
+            interp.Output(Msg::OutOfArrows);
+            interp.Output(Msg::YouLose);
+            interp.SetState(AwaitingReplay);
+        }
+        else if (!interp.m_playerState.PlayerAlive())
+        {
+            // TODO wumpus moved and got you
+        }
+        else
         {
             Initial.OutputStandardMessage(interp);
             interp.SetState(AwaitingCommand);

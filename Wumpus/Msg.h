@@ -20,6 +20,7 @@ namespace Msg
     static const string Missed = "MISSED";
     static const string NotThatCrooked = "ARROWS AREN'T THAT CROOKED - TRY ANOTHER ROOM";
     static const string NumberOfRooms = "N0. OF ROOMS (l-5)? ";
+    static const string OutOfArrows = "THAT WAS YOUR LAST ARROW";
     static const string RoomNumber = "ROOM #? ";
     static const string SameSetup = "SAME SET-UP (Y-N)? ";
     static const string ShootOrMove = "SHOOT OR MOVE (S-M)? ";
