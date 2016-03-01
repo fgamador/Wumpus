@@ -127,16 +127,17 @@ strvec CommandInterpreter::Input(string input)
 void CommandInterpreter::InitialState::Input(string input, CommandInterpreter& interp) const
 {
     interp.Output(Msg::HuntTheWumpus);
-    interp.Output("");
 
     if (input == "")
     {
+        interp.Output("");
         OutputStandardMessage(interp);
         interp.SetState(AwaitingCommand);
         return;
     }
 
     eventvec events = interp.m_commands.RandomPlacements();
+    interp.Output("");
     OutputEvents(events, interp);
 
     if (interp.m_playerState.PlayerAlive())
@@ -194,6 +195,7 @@ void CommandInterpreter::AwaitingMoveRoomState::Input(string input, CommandInter
     try
     {
         eventvec events = interp.m_commands.MovePlayer(stoi(input));
+        interp.Output("");
         OutputEvents(events, interp);
     }
     catch (const exception&)
@@ -269,7 +271,11 @@ void CommandInterpreter::AwaitingArrowRoomState::Input(string input, CommandInte
     try
     {
         eventvec events = interp.m_commands.MoveArrow(stoi(input));
-        OutputEvents(events, interp);
+        if (!events.empty())
+        {
+            interp.Output("");
+            OutputEvents(events, interp);
+        }
 
         if (events.empty())
         {

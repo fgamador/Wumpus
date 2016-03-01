@@ -139,22 +139,23 @@ namespace {
         REQUIRE(output == msgs);
     }
 
-    void RequireNextMoveOutput(const strvec& output)
+    void RequireOutput(const strvec& output, const strvec& msgs, unsigned& outputIndex)
     {
-        RequireOutput(output, {
-            Msg::YouAreInRoom + "1",
-            Msg::TunnelsLeadTo + "2 3 4",
-            "",
-            Msg::ShootOrMove
-        });
+        for (unsigned i = 0; i < msgs.size(); ++i)
+            REQUIRE(output[outputIndex++] == msgs[i]);
     }
 
     void RequireNextMoveOutput(const strvec& output, const strvec& leadingMsgs)
     {
         REQUIRE(output.size() >= leadingMsgs.size());
-        for (unsigned i = 0; i < leadingMsgs.size(); ++i)
-            REQUIRE(output[i] == leadingMsgs[i]);
-        RequireNextMoveOutput(strvec(output.begin() + leadingMsgs.size(), output.end()));
+        unsigned outputIndex = 0;
+        RequireOutput(output, leadingMsgs, outputIndex);
+        RequireOutput(output, {
+            Msg::YouAreInRoom + "1",
+            Msg::TunnelsLeadTo + "2 3 4",
+            "",
+            Msg::ShootOrMove
+        }, outputIndex);
     }
 }
 
@@ -267,7 +268,7 @@ TEST_CASE("CommandInterpreter")
         {
             auto output = interp.Input("2");
             RequireCommands(commands, { "MovePlayer 2" });
-            RequireNextMoveOutput(output);
+            RequireNextMoveOutput(output, { "" });
         }
 
         SECTION("Room-number input, no such room")
@@ -291,7 +292,7 @@ TEST_CASE("CommandInterpreter")
             commands.events = { Event::BumpedWumpus };
             auto output = interp.Input("2");
             RequireCommands(commands, { "MovePlayer 2" });
-            RequireNextMoveOutput(output, { Msg::BumpedWumpus });
+            RequireNextMoveOutput(output, { "", Msg::BumpedWumpus });
         }
 
         SECTION("Bumped and eaten by wumpus")
@@ -300,7 +301,7 @@ TEST_CASE("CommandInterpreter")
             playerState.playerAlive = false;
             auto output = interp.Input("2");
             RequireCommands(commands, { "MovePlayer 2" });
-            RequireOutput(output, { Msg::BumpedWumpus, Msg::WumpusGotYou, Msg::YouLose, Msg::SameSetup });
+            RequireOutput(output, { "", Msg::BumpedWumpus, Msg::WumpusGotYou, Msg::YouLose, Msg::SameSetup });
         }
 
         SECTION("Bat snatch")
@@ -308,7 +309,7 @@ TEST_CASE("CommandInterpreter")
             commands.events = { Event::BatSnatch };
             auto output = interp.Input("2");
             RequireCommands(commands, { "MovePlayer 2" });
-            RequireNextMoveOutput(output, { Msg::BatSnatch });
+            RequireNextMoveOutput(output, { "", Msg::BatSnatch });
         }
 
         SECTION("Fell in pit")
@@ -317,7 +318,7 @@ TEST_CASE("CommandInterpreter")
             playerState.playerAlive = false;
             auto output = interp.Input("2");
             RequireCommands(commands, { "MovePlayer 2" });
-            RequireOutput(output, { Msg::FellInPit, Msg::YouLose, Msg::SameSetup });
+            RequireOutput(output, { "", Msg::FellInPit, Msg::YouLose, Msg::SameSetup });
         }
     }
 
@@ -399,7 +400,7 @@ TEST_CASE("CommandInterpreter")
             commands.events = { Event::MissedWumpus };
             auto output = interp.Input("12");
             RequireCommands(commands, { "MoveArrow 10", "MoveArrow 11", "MoveArrow 12" });
-            RequireNextMoveOutput(output, { Msg::Missed });
+            RequireNextMoveOutput(output, { "", Msg::Missed });
         }
 
         SECTION("Miss, wumpus move to player")
@@ -408,7 +409,7 @@ TEST_CASE("CommandInterpreter")
             playerState.playerAlive = false;
             auto output = interp.Input("10");
             RequireCommands(commands, { "MoveArrow 10" });
-            RequireOutput(output, { Msg::Missed, Msg::BumpedWumpus, Msg::WumpusGotYou, Msg::YouLose, Msg::SameSetup });
+            RequireOutput(output, { "", Msg::Missed, Msg::BumpedWumpus, Msg::WumpusGotYou, Msg::YouLose, Msg::SameSetup });
         }
 
         SECTION("Miss with last arrow")
@@ -417,7 +418,7 @@ TEST_CASE("CommandInterpreter")
             playerState.arrowsRemaining = 0;
             auto output = interp.Input("10");
             RequireCommands(commands, { "MoveArrow 10" });
-            RequireOutput(output, { Msg::Missed, Msg::OutOfArrows, Msg::YouLose, Msg::SameSetup });
+            RequireOutput(output, { "", Msg::Missed, Msg::OutOfArrows, Msg::YouLose, Msg::SameSetup });
         }
 
         SECTION("Full path, hit")
@@ -428,7 +429,7 @@ TEST_CASE("CommandInterpreter")
             playerState.wumpusAlive = false;
             auto output = interp.Input("12");
             RequireCommands(commands, { "MoveArrow 10", "MoveArrow 11", "MoveArrow 12" });
-            RequireOutput(output, { Msg::GotTheWumpus, Msg::GetYouNextTime, Msg::Exit });
+            RequireOutput(output, { "", Msg::GotTheWumpus, Msg::GetYouNextTime, Msg::Exit });
         }
     }
 

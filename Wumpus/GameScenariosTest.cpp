@@ -44,7 +44,7 @@ TEST_CASE("Article full game")
 
     randomSource.SetNextInts({ 7 });
     output = interp.Input("1");
-    RequireOutput(output, { Msg::BatSnatch, Msg::FellInPit, Msg::YouLose, Msg::SameSetup });
+    RequireOutput(output, { "", Msg::BatSnatch, Msg::FellInPit, Msg::YouLose, Msg::SameSetup });
 
     output = interp.Input("Y");
     RequireNextMoveOutput(output, { Msg::HuntTheWumpus, "", Msg::BatsNearby }, 2, { 1, 3, 10 });
@@ -53,31 +53,31 @@ TEST_CASE("Article full game")
     RequireOutput(output, { Msg::WhereTo });
 
     output = interp.Input("3");
-    RequireNextMoveOutput(output, 3, { 2, 4, 12 });
+    RequireNextMoveOutput(output, { "" }, 3, { 2, 4, 12 });
 
     output = interp.Input("M");
     RequireOutput(output, { Msg::WhereTo });
 
     output = interp.Input("4");
-    RequireNextMoveOutput(output, 4, { 3, 5, 14 });
+    RequireNextMoveOutput(output, { "" }, 4, { 3, 5, 14 });
 
     output = interp.Input("M");
     RequireOutput(output, { Msg::WhereTo });
 
     output = interp.Input("5");
-    RequireNextMoveOutput(output, { Msg::BatsNearby }, 5, { 1, 4, 6 });
+    RequireNextMoveOutput(output, { "", Msg::BatsNearby }, 5, { 1, 4, 6 });
 
     output = interp.Input("M");
     RequireOutput(output, { Msg::WhereTo });
 
     output = interp.Input("6");
-    RequireNextMoveOutput(output, { Msg::FeelDraft }, 6, { 5, 7, 15 });
+    RequireNextMoveOutput(output, { "", Msg::FeelDraft }, 6, { 5, 7, 15 });
 
     output = interp.Input("M");
     RequireOutput(output, { Msg::WhereTo });
 
     output = interp.Input("7");
-    RequireOutput(output, { Msg::FellInPit, Msg::YouLose, Msg::SameSetup });
+    RequireOutput(output, { "", Msg::FellInPit, Msg::YouLose, Msg::SameSetup });
 
     output = interp.Input("Y");
     RequireNextMoveOutput(output, { Msg::HuntTheWumpus, "", Msg::BatsNearby }, 2, { 1, 3, 10 });
@@ -86,20 +86,20 @@ TEST_CASE("Article full game")
     RequireOutput(output, { Msg::WhereTo });
 
     output = interp.Input("10");
-    RequireNextMoveOutput(output, { Msg::BatsNearby }, 10, { 2, 9, 11 });
+    RequireNextMoveOutput(output, { "", Msg::BatsNearby }, 10, { 2, 9, 11 });
 
     output = interp.Input("M");
     RequireOutput(output, { Msg::WhereTo });
 
     randomSource.SetNextInts({ 14 });
     output = interp.Input("11");
-    RequireNextMoveOutput(output, { Msg::BatSnatch }, 14, { 4, 13, 15 });
+    RequireNextMoveOutput(output, { "", Msg::BatSnatch }, 14, { 4, 13, 15 });
 
     output = interp.Input("M");
     RequireOutput(output, { Msg::WhereTo });
 
     output = interp.Input("15");
-    RequireNextMoveOutput(output, { Msg::SmellWumpus }, 15, { 6, 14, 16 });
+    RequireNextMoveOutput(output, { "", Msg::SmellWumpus }, 15, { 6, 14, 16 });
 
     output = interp.Input("S");
     RequireOutput(output, { Msg::NumberOfRooms });
@@ -108,5 +108,5 @@ TEST_CASE("Article full game")
     RequireOutput(output, { Msg::RoomNumber });
 
     output = interp.Input("16");
-    RequireOutput(output, { Msg::GotTheWumpus, Msg::GetYouNextTime, Msg::Exit });
+    RequireOutput(output, { "", Msg::GotTheWumpus, Msg::GetYouNextTime, Msg::Exit });
 }
