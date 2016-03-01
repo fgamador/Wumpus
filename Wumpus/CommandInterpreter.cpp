@@ -325,19 +325,39 @@ void CommandInterpreter::AwaitingReplayState::Input(string input, CommandInterpr
     }
     else if (input == "Y" || input == "y")
     {
-        interp.m_commands.Replay();
+        eventvec events = interp.m_commands.Replay();
         interp.Output(Msg::HuntTheWumpus);
         interp.Output("");
-        Initial.OutputStandardMessage(interp);
-        interp.SetState(AwaitingCommand);
+        OutputEvents(events, interp);
+
+        if (interp.m_playerState.PlayerAlive())
+        {
+            Initial.OutputStandardMessage(interp);
+            interp.SetState(AwaitingCommand);
+        }
+        else
+        {
+            interp.Output(Msg::YouLose);
+            OutputStandardMessage(interp);
+        }
     }
     else if (input == "N" || input == "n")
     {
-        interp.m_commands.Restart();
+        eventvec events = interp.m_commands.Restart();
         interp.Output(Msg::HuntTheWumpus);
         interp.Output("");
-        Initial.OutputStandardMessage(interp);
-        interp.SetState(AwaitingCommand);
+        OutputEvents(events, interp);
+
+        if (interp.m_playerState.PlayerAlive())
+        {
+            Initial.OutputStandardMessage(interp);
+            interp.SetState(AwaitingCommand);
+        }
+        else
+        {
+            interp.Output(Msg::YouLose);
+            OutputStandardMessage(interp);
+        }
     }
     else
     {

@@ -456,37 +456,35 @@ TEST_CASE("CommandInterpreter")
 
         SECTION("Y input")
         {
+            playerState.playerAlive = true;
             auto output = interp.Input("Y");
             RequireCommands(commands, { "Replay" });
             RequireNextMoveOutput(output, { Msg::HuntTheWumpus, "" });
         }
 
-        // TODO
-        //SECTION("Y input, restart in wumpus room")
-        //{
-        //    commands.events = { Event::BumpedWumpus, Event::EatenByWumpus };
-        //    playerState.playerAlive = false;
-        //    auto output = interp.Input("Y");
-        //    RequireCommands(commands, { "Replay" });
-        //    RequireOutput(output, { Msg::HuntTheWumpus, "", Msg::BumpedWumpus, Msg::WumpusGotYou, Msg::YouLose, Msg::SameSetup });
-        //}
+        SECTION("Y input, restart in wumpus room")
+        {
+            commands.events = { Event::BumpedWumpus, Event::EatenByWumpus };
+            auto output = interp.Input("Y");
+            RequireCommands(commands, { "Replay" });
+            RequireOutput(output, { Msg::HuntTheWumpus, "", Msg::BumpedWumpus, Msg::WumpusGotYou, Msg::YouLose, Msg::SameSetup });
+        }
 
         SECTION("N input")
         {
+            playerState.playerAlive = true;
             auto output = interp.Input("N");
             RequireCommands(commands, { "Restart" });
             RequireNextMoveOutput(output, { Msg::HuntTheWumpus, "" });
         }
 
-        // TODO
-        //SECTION("N input, restart in wumpus room")
-        //{
-        //    commands.events = { Event::BumpedWumpus, Event::EatenByWumpus };
-        //    playerState.playerAlive = false;
-        //    auto output = interp.Input("N");
-        //    RequireCommands(commands, { "Restart" });
-        //    RequireOutput(output, { Msg::HuntTheWumpus, "", Msg::BumpedWumpus, Msg::WumpusGotYou, Msg::YouLose, Msg::SameSetup });
-        //}
+        SECTION("N input, restart in wumpus room")
+        {
+            commands.events = { Event::BumpedWumpus, Event::EatenByWumpus };
+            auto output = interp.Input("N");
+            RequireCommands(commands, { "Restart" });
+            RequireOutput(output, { Msg::HuntTheWumpus, "", Msg::BumpedWumpus, Msg::WumpusGotYou, Msg::YouLose, Msg::SameSetup });
+        }
     }
 
     SECTION("Stream I/O")

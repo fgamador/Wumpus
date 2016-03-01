@@ -346,6 +346,7 @@ TEST_CASE("Game model")
                 REQUIRE_THROWS_AS(model.MoveArrow(21), NoSuchRoomException);
             }
 
+            // TODO use random room
             SECTION("Room not connected")
             {
                 model.MoveArrow(10);
