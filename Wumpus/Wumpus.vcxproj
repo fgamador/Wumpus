@@ -95,6 +95,7 @@
     <ClInclude Include="SimpleRandomSource.h" />
     <ClInclude Include="RandomSourceStub.h" />
     <ClInclude Include="RoomsNotConnectedException.h" />
+    <ClInclude Include="typedefs.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CommandInterpreter.cpp" />

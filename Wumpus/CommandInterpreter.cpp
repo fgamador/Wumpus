@@ -1,42 +1,31 @@
 #include "CommandInterpreter.h"
 
+#include <map>
 #include <sstream>
 
 #include "Msg.h"
 
 const string CommandInterpreter::RandomPlacements("[RandomPlacements]");
 
+const map<Event, string> CommandInterpreter::EventMsgs =
+{
+    { Event::BatSnatch, Msg::BatSnatch },
+    { Event::BumpedWumpus, Msg::BumpedWumpus },
+    { Event::EatenByWumpus, Msg::WumpusGotYou },
+    { Event::FellInPit, Msg::FellInPit },
+    { Event::KilledWumpus, Msg::GotTheWumpus },
+    { Event::MissedWumpus, Msg::Missed }
+};
+
 class CommandInterpreter::State
 {
+    static map<Event, string> eventMsgs;
+
 public:
     virtual void Input(string input, CommandInterpreter& interp) const = 0;
     virtual void OutputStandardMessage(CommandInterpreter& interp) const = 0;
 
 protected:
-    void OutputEvents(const eventvec& events, CommandInterpreter& interp) const
-    {
-        for (Event event : events)
-        {
-            switch (event)
-            {
-            case Event::BatSnatch:
-                interp.Output(Msg::BatSnatch);
-                break;
-            case Event::BumpedWumpus:
-                interp.Output(Msg::BumpedWumpus);
-                break;
-            case Event::EatenByWumpus:
-                interp.Output(Msg::WumpusGotYou);
-                break;
-            case Event::FellInPit:
-                interp.Output(Msg::FellInPit);
-                break;
-            case Event::MissedWumpus:
-                interp.Output(Msg::Missed);
-                break;
-            }
-        }
-    }
 };
 
 class CommandInterpreter::InitialState : public State
@@ -138,7 +127,7 @@ void CommandInterpreter::InitialState::Input(string input, CommandInterpreter& i
 
     eventvec events = interp.m_commands.RandomPlacements();
     interp.Output("");
-    OutputEvents(events, interp);
+    interp.OutputEvents(events);
 
     if (interp.m_playerState.PlayerAlive())
     {
@@ -196,7 +185,7 @@ void CommandInterpreter::AwaitingMoveRoomState::Input(string input, CommandInter
     {
         eventvec events = interp.m_commands.MovePlayer(stoi(input));
         interp.Output("");
-        OutputEvents(events, interp);
+        interp.OutputEvents(events);
     }
     catch (const exception&)
     {
@@ -274,7 +263,7 @@ void CommandInterpreter::AwaitingArrowRoomState::Input(string input, CommandInte
         if (!events.empty())
         {
             interp.Output("");
-            OutputEvents(events, interp);
+            interp.OutputEvents(events);
         }
 
         if (events.empty())
@@ -283,7 +272,6 @@ void CommandInterpreter::AwaitingArrowRoomState::Input(string input, CommandInte
         }
         else if (!interp.m_playerState.WumpusAlive())
         {
-            interp.Output(Msg::GotTheWumpus);
             interp.Output(Msg::GetYouNextTime);
             interp.Output(Msg::Exit);
         }
@@ -334,7 +322,7 @@ void CommandInterpreter::AwaitingReplayState::Input(string input, CommandInterpr
         eventvec events = interp.m_commands.Replay();
         interp.Output(Msg::HuntTheWumpus);
         interp.Output("");
-        OutputEvents(events, interp);
+        interp.OutputEvents(events);
 
         if (interp.m_playerState.PlayerAlive())
         {
@@ -352,7 +340,7 @@ void CommandInterpreter::AwaitingReplayState::Input(string input, CommandInterpr
         eventvec events = interp.m_commands.Restart();
         interp.Output(Msg::HuntTheWumpus);
         interp.Output("");
-        OutputEvents(events, interp);
+        interp.OutputEvents(events);
 
         if (interp.m_playerState.PlayerAlive())
         {
@@ -377,6 +365,17 @@ void CommandInterpreter::AwaitingReplayState::OutputStandardMessage(CommandInter
     interp.Output(Msg::SameSetup);
 }
 
+void CommandInterpreter::Output(const string& str)
+{
+    m_output.push_back(str);
+}
+
+void CommandInterpreter::OutputEvents(const eventvec& events)
+{
+    for (Event event : events)
+        Output(EventMsgs.at(event));
+}
+
 void CommandInterpreter::OutputPlayerState()
 {
     if (m_playerState.WumpusAdjacent())
@@ -394,11 +393,6 @@ void CommandInterpreter::OutputPlayerState()
     ostringstream out2;
     out2 << Msg::TunnelsLeadTo << connected[0] << " " << connected[1] << " " << connected[2];
     Output(out2.str());
-}
-
-void CommandInterpreter::Output(const string& str)
-{
-    m_output.push_back(str);
 }
 
 void CommandInterpreter::SetState(const State& state)

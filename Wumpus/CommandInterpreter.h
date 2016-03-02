@@ -1,18 +1,17 @@
 #pragma once
 
 #include <iostream>
-#include <string>
-#include <vector>
 #include "GameModel.h"
+#include "typedefs.h"
 
-using namespace std;
-
-typedef vector<string> strvec;
+using std::istream;
+using std::ostream;
 
 class CommandInterpreter
 {
 public:
     static const string RandomPlacements;
+    static const map<Event, string> EventMsgs;
 
     CommandInterpreter(GameCommands& commands, const PlayerState& playerState);
 
@@ -29,8 +28,9 @@ private:
     class AwaitingReplayState;
 
 private:
-    void OutputPlayerState();
     void Output(const string& str);
+    void OutputEvents(const eventvec& events);
+    void OutputPlayerState();
     void SetState(const State& state);
 
 private:
