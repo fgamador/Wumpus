@@ -47,6 +47,9 @@ class Interpreter::AwaitingMoveRoomState : public State
 public:
     void Input(string input, Interpreter& interp) const override;
     void OutputStandardMessage(Interpreter& interp) const override;
+
+private:
+    void MovePlayer(const string& input, Interpreter& interp) const;
 };
 
 class Interpreter::AwaitingArrowPathLengthState : public State
@@ -54,6 +57,9 @@ class Interpreter::AwaitingArrowPathLengthState : public State
 public:
     void Input(string input, Interpreter& interp) const override;
     void OutputStandardMessage(Interpreter& interp) const override;
+
+private:
+    void PrepareArrow(const string& input, Interpreter& interp) const;
 };
 
 class Interpreter::AwaitingArrowRoomState : public State
@@ -61,14 +67,19 @@ class Interpreter::AwaitingArrowRoomState : public State
 public:
     void Input(string input, Interpreter& interp) const override;
     void OutputStandardMessage(Interpreter& interp) const override;
+
+private:
+    void MoveArrow(const string& input, Interpreter& interp) const;
 };
 
 class Interpreter::AwaitingReplayState : public State
 {
 public:
     void Input(string input, Interpreter& interp) const override;
-    void StartGame(const eventvec& events, Interpreter& interp) const;
     void OutputStandardMessage(Interpreter& interp) const override;
+
+private:
+    void StartGame(const eventvec& events, Interpreter& interp) const;
 };
 
 Interpreter::InitialState Interpreter::Initial;
@@ -117,19 +128,17 @@ strvec Interpreter::Input(string input)
 void Interpreter::InitialState::Input(string input, Interpreter& interp) const
 {
     interp.Output(Msg::HuntTheWumpus);
+    interp.Output("");
 
     if (input == "")
     {
-        interp.Output("");
         OutputStandardMessage(interp);
         interp.SetState(AwaitingCommand);
         return;
     }
 
     eventvec events = interp.m_commands.RandomPlacements();
-    interp.Output("");
     interp.OutputEvents(events);
-
     interp.CheckPlayerAlive();
 }
 
@@ -175,23 +184,25 @@ void Interpreter::AwaitingMoveRoomState::Input(string input, Interpreter& interp
 
     try
     {
-        eventvec events = interp.m_commands.MovePlayer(stoi(input));
-        interp.Output("");
-        interp.OutputEvents(events);
+        MovePlayer(input, interp);
     }
     catch (const exception&)
     {
         interp.Output(Msg::Huh);
         OutputStandardMessage(interp);
-        return;
     }
     catch (const GameException&)
     {
         interp.Output(Msg::Impossible);
         OutputStandardMessage(interp);
-        return;
     }
+}
 
+void Interpreter::AwaitingMoveRoomState::MovePlayer(const string& input, Interpreter& interp) const
+{
+    eventvec events = interp.m_commands.MovePlayer(stoi(input));
+    interp.Output("");
+    interp.OutputEvents(events);
     interp.CheckPlayerAlive();
 }
 
@@ -210,21 +221,24 @@ void Interpreter::AwaitingArrowPathLengthState::Input(string input, Interpreter&
 
     try
     {
-        interp.m_commands.PrepareArrow(stoi(input));
-        interp.SetState(AwaitingArrowRoom);
+        PrepareArrow(input, interp);
     }
     catch (const exception&)
     {
         interp.Output(Msg::Huh);
         OutputStandardMessage(interp);
-        return;
     }
     catch (const ArrowPathLengthException&)
     {
         interp.Output(Msg::Impossible);
         OutputStandardMessage(interp);
-        return;
     }
+}
+
+void Interpreter::AwaitingArrowPathLengthState::PrepareArrow(const string& input, Interpreter& interp) const
+{
+    interp.m_commands.PrepareArrow(stoi(input));
+    interp.SetState(AwaitingArrowRoom);
 }
 
 void Interpreter::AwaitingArrowPathLengthState::OutputStandardMessage(Interpreter& interp) const
@@ -242,51 +256,47 @@ void Interpreter::AwaitingArrowRoomState::Input(string input, Interpreter& inter
 
     try
     {
-        eventvec events = interp.m_commands.MoveArrow(stoi(input));
-        if (!events.empty())
-        {
-            interp.Output("");
-            interp.OutputEvents(events);
-        }
-
-        if (events.empty())
-        {
-            OutputStandardMessage(interp);
-        }
-        else if (!interp.m_playerState.WumpusAlive())
-        {
-            interp.Output(Msg::GetYouNextTime);
-            interp.Output(Msg::Exit);
-        }
-        else if (interp.m_playerState.GetArrowsRemaining() == 0)
-        {
-            interp.Output(Msg::OutOfArrows);
-            interp.Output(Msg::YouLose);
-            interp.SetState(AwaitingReplay);
-        }
-        else if (!interp.m_playerState.PlayerAlive())
-        {
-            interp.Output(Msg::YouLose);
-            interp.SetState(AwaitingReplay);
-        }
-        else
-        {
-            Initial.OutputStandardMessage(interp);
-            interp.SetState(AwaitingCommand);
-        }
+        MoveArrow(input, interp);
     }
     catch (const exception&)
     {
         interp.Output(Msg::Huh);
         OutputStandardMessage(interp);
-        return;
     }
     catch (const ArrowDoubleBackException&)
     {
         interp.Output(Msg::NotThatCrooked);
         OutputStandardMessage(interp);
+    }
+}
+
+void Interpreter::AwaitingArrowRoomState::MoveArrow(const string& input, Interpreter& interp) const
+{
+    eventvec events = interp.m_commands.MoveArrow(stoi(input));
+    if (events.empty())
+    {
+        OutputStandardMessage(interp);
         return;
     }
+
+    interp.Output("");
+    interp.OutputEvents(events);
+
+    if (!interp.m_playerState.WumpusAlive())
+    {
+        interp.Output(Msg::GetYouNextTime);
+        interp.Output(Msg::Exit);
+        return;
+    }
+    else if (interp.m_playerState.GetArrowsRemaining() == 0)
+    {
+        interp.Output(Msg::OutOfArrows);
+        interp.Output(Msg::YouLose);
+        interp.SetState(AwaitingReplay);
+        return;
+    }
+
+    interp.CheckPlayerAlive();
 }
 
 void Interpreter::AwaitingArrowRoomState::OutputStandardMessage(Interpreter& interp) const
