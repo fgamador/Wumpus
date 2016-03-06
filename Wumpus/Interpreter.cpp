@@ -23,7 +23,7 @@ class Interpreter::State
 
 public:
     virtual void Input(string input, Interpreter& interp) const = 0;
-    virtual void OutputStandardMessage(Interpreter& interp) const = 0;
+    virtual void OutputStateMessage(Interpreter& interp) const = 0;
 
 protected:
 };
@@ -32,21 +32,21 @@ class Interpreter::InitialState : public State
 {
 public:
     void Input(string input, Interpreter& interp) const override;
-    void OutputStandardMessage(Interpreter& interp) const override;
+    void OutputStateMessage(Interpreter& interp) const override;
 };
 
 class Interpreter::AwaitingCommandState : public State
 {
 public:
     void Input(string input, Interpreter& interp) const override;
-    void OutputStandardMessage(Interpreter& interp) const override;
+    void OutputStateMessage(Interpreter& interp) const override;
 };
 
 class Interpreter::AwaitingMoveRoomState : public State
 {
 public:
     void Input(string input, Interpreter& interp) const override;
-    void OutputStandardMessage(Interpreter& interp) const override;
+    void OutputStateMessage(Interpreter& interp) const override;
 
 private:
     void MovePlayer(const string& input, Interpreter& interp) const;
@@ -56,7 +56,7 @@ class Interpreter::AwaitingArrowPathLengthState : public State
 {
 public:
     void Input(string input, Interpreter& interp) const override;
-    void OutputStandardMessage(Interpreter& interp) const override;
+    void OutputStateMessage(Interpreter& interp) const override;
 
 private:
     void PrepareArrow(const string& input, Interpreter& interp) const;
@@ -66,7 +66,7 @@ class Interpreter::AwaitingArrowRoomState : public State
 {
 public:
     void Input(string input, Interpreter& interp) const override;
-    void OutputStandardMessage(Interpreter& interp) const override;
+    void OutputStateMessage(Interpreter& interp) const override;
 
 private:
     void MoveArrow(const string& input, Interpreter& interp) const;
@@ -76,7 +76,7 @@ class Interpreter::AwaitingReplayState : public State
 {
 public:
     void Input(string input, Interpreter& interp) const override;
-    void OutputStandardMessage(Interpreter& interp) const override;
+    void OutputStateMessage(Interpreter& interp) const override;
 
 private:
     void StartGame(const eventvec& events, Interpreter& interp) const;
@@ -121,7 +121,7 @@ strvec Interpreter::Input(string input)
     const State* prevState = m_state;
     m_state->Input(input, *this);
     if (m_state != prevState)
-        m_state->OutputStandardMessage(*this);
+        m_state->OutputStateMessage(*this);
     return m_output;
 }
 
@@ -132,7 +132,7 @@ void Interpreter::InitialState::Input(string input, Interpreter& interp) const
 
     if (input == "")
     {
-        OutputStandardMessage(interp);
+        OutputStateMessage(interp);
         interp.SetState(AwaitingCommand);
         return;
     }
@@ -142,7 +142,7 @@ void Interpreter::InitialState::Input(string input, Interpreter& interp) const
     interp.CheckPlayerAlive();
 }
 
-void Interpreter::InitialState::OutputStandardMessage(Interpreter& interp) const
+void Interpreter::InitialState::OutputStateMessage(Interpreter& interp) const
 {
     interp.OutputPlayerState();
     interp.Output("");
@@ -152,9 +152,11 @@ void Interpreter::AwaitingCommandState::Input(string input, Interpreter& interp)
 {
     if (input == "")
     {
-        OutputStandardMessage(interp);
+        OutputStateMessage(interp);
+        return;
     }
-    else if (input == "M" || input == "m")
+
+    if (input == "M" || input == "m")
     {
         interp.SetState(AwaitingMoveRoom);
     }
@@ -165,11 +167,11 @@ void Interpreter::AwaitingCommandState::Input(string input, Interpreter& interp)
     else
     {
         interp.Output(Msg::Huh);
-        OutputStandardMessage(interp);
+        OutputStateMessage(interp);
     }
 }
 
-void Interpreter::AwaitingCommandState::OutputStandardMessage(Interpreter& interp) const
+void Interpreter::AwaitingCommandState::OutputStateMessage(Interpreter& interp) const
 {
     interp.Output(Msg::ShootOrMove);
 }
@@ -178,7 +180,7 @@ void Interpreter::AwaitingMoveRoomState::Input(string input, Interpreter& interp
 {
     if (input == "")
     {
-        OutputStandardMessage(interp);
+        OutputStateMessage(interp);
         return;
     }
 
@@ -189,12 +191,12 @@ void Interpreter::AwaitingMoveRoomState::Input(string input, Interpreter& interp
     catch (const exception&)
     {
         interp.Output(Msg::Huh);
-        OutputStandardMessage(interp);
+        OutputStateMessage(interp);
     }
     catch (const GameException&)
     {
         interp.Output(Msg::Impossible);
-        OutputStandardMessage(interp);
+        OutputStateMessage(interp);
     }
 }
 
@@ -206,7 +208,7 @@ void Interpreter::AwaitingMoveRoomState::MovePlayer(const string& input, Interpr
     interp.CheckPlayerAlive();
 }
 
-void Interpreter::AwaitingMoveRoomState::OutputStandardMessage(Interpreter& interp) const
+void Interpreter::AwaitingMoveRoomState::OutputStateMessage(Interpreter& interp) const
 {
     interp.Output(Msg::WhereTo);
 }
@@ -215,7 +217,7 @@ void Interpreter::AwaitingArrowPathLengthState::Input(string input, Interpreter&
 {
     if (input == "")
     {
-        OutputStandardMessage(interp);
+        OutputStateMessage(interp);
         return;
     }
 
@@ -226,12 +228,12 @@ void Interpreter::AwaitingArrowPathLengthState::Input(string input, Interpreter&
     catch (const exception&)
     {
         interp.Output(Msg::Huh);
-        OutputStandardMessage(interp);
+        OutputStateMessage(interp);
     }
     catch (const ArrowPathLengthException&)
     {
         interp.Output(Msg::Impossible);
-        OutputStandardMessage(interp);
+        OutputStateMessage(interp);
     }
 }
 
@@ -241,7 +243,7 @@ void Interpreter::AwaitingArrowPathLengthState::PrepareArrow(const string& input
     interp.SetState(AwaitingArrowRoom);
 }
 
-void Interpreter::AwaitingArrowPathLengthState::OutputStandardMessage(Interpreter& interp) const
+void Interpreter::AwaitingArrowPathLengthState::OutputStateMessage(Interpreter& interp) const
 {
     interp.Output(Msg::NumberOfRooms);
 }
@@ -250,7 +252,7 @@ void Interpreter::AwaitingArrowRoomState::Input(string input, Interpreter& inter
 {
     if (input == "")
     {
-        OutputStandardMessage(interp);
+        OutputStateMessage(interp);
         return;
     }
 
@@ -261,12 +263,12 @@ void Interpreter::AwaitingArrowRoomState::Input(string input, Interpreter& inter
     catch (const exception&)
     {
         interp.Output(Msg::Huh);
-        OutputStandardMessage(interp);
+        OutputStateMessage(interp);
     }
     catch (const ArrowDoubleBackException&)
     {
         interp.Output(Msg::NotThatCrooked);
-        OutputStandardMessage(interp);
+        OutputStateMessage(interp);
     }
 }
 
@@ -275,7 +277,7 @@ void Interpreter::AwaitingArrowRoomState::MoveArrow(const string& input, Interpr
     eventvec events = interp.m_commands.MoveArrow(stoi(input));
     if (events.empty())
     {
-        OutputStandardMessage(interp);
+        OutputStateMessage(interp);
         return;
     }
 
@@ -299,7 +301,7 @@ void Interpreter::AwaitingArrowRoomState::MoveArrow(const string& input, Interpr
     interp.CheckPlayerAlive();
 }
 
-void Interpreter::AwaitingArrowRoomState::OutputStandardMessage(Interpreter& interp) const
+void Interpreter::AwaitingArrowRoomState::OutputStateMessage(Interpreter& interp) const
 {
     interp.Output(Msg::RoomNumber);
 }
@@ -308,9 +310,11 @@ void Interpreter::AwaitingReplayState::Input(string input, Interpreter& interp) 
 {
     if (input == "")
     {
-        OutputStandardMessage(interp);
+        OutputStateMessage(interp);
+        return;
     }
-    else if (input == "Y" || input == "y")
+
+    if (input == "Y" || input == "y")
     {
         eventvec events = interp.m_commands.Replay();
         StartGame(events, interp);
@@ -323,7 +327,7 @@ void Interpreter::AwaitingReplayState::Input(string input, Interpreter& interp) 
     else
     {
         interp.Output(Msg::Huh);
-        OutputStandardMessage(interp);
+        OutputStateMessage(interp);
     }
 }
 
@@ -335,10 +339,10 @@ void Interpreter::AwaitingReplayState::StartGame(const eventvec& events, Interpr
     interp.CheckPlayerAlive();
     // TODO lame; we're already in AwaitingReplayState, so msg not automatically output
     if (!interp.m_playerState.PlayerAlive())
-        OutputStandardMessage(interp);
+        OutputStateMessage(interp);
 }
 
-void Interpreter::AwaitingReplayState::OutputStandardMessage(Interpreter& interp) const
+void Interpreter::AwaitingReplayState::OutputStateMessage(Interpreter& interp) const
 {
     interp.Output(Msg::SameSetup);
 }
