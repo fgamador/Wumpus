@@ -26,6 +26,7 @@ private:
     class AwaitingArrowPathLengthState;
     class AwaitingArrowRoomState;
     class AwaitingReplayState;
+    class EndState;
 
 private:
     void CheckPlayerAlive();
@@ -46,4 +47,5 @@ private:
     static AwaitingArrowPathLengthState AwaitingArrowPathLength;
     static AwaitingArrowRoomState AwaitingArrowRoom;
     static AwaitingReplayState AwaitingReplay;
+    static EndState End;
 };
