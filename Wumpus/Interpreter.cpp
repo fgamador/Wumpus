@@ -1,13 +1,13 @@
-#include "CommandInterpreter.h"
+#include "Interpreter.h"
 
 #include <map>
 #include <sstream>
 
 #include "Msg.h"
 
-const string CommandInterpreter::RandomPlacements("[RandomPlacements]");
+const string Interpreter::RandomPlacements("[RandomPlacements]");
 
-const map<Event, string> CommandInterpreter::EventMsgs =
+const map<Event, string> Interpreter::EventMsgs =
 {
     { Event::BatSnatch, Msg::BatSnatch },
     { Event::BumpedWumpus, Msg::BumpedWumpus },
@@ -17,74 +17,74 @@ const map<Event, string> CommandInterpreter::EventMsgs =
     { Event::MissedWumpus, Msg::Missed }
 };
 
-class CommandInterpreter::State
+class Interpreter::State
 {
     static map<Event, string> eventMsgs;
 
 public:
-    virtual void Input(string input, CommandInterpreter& interp) const = 0;
-    virtual void OutputStandardMessage(CommandInterpreter& interp) const = 0;
+    virtual void Input(string input, Interpreter& interp) const = 0;
+    virtual void OutputStandardMessage(Interpreter& interp) const = 0;
 
 protected:
 };
 
-class CommandInterpreter::InitialState : public State
+class Interpreter::InitialState : public State
 {
 public:
-    void Input(string input, CommandInterpreter& interp) const override;
-    void OutputStandardMessage(CommandInterpreter& interp) const override;
+    void Input(string input, Interpreter& interp) const override;
+    void OutputStandardMessage(Interpreter& interp) const override;
 };
 
-class CommandInterpreter::AwaitingCommandState : public State
+class Interpreter::AwaitingCommandState : public State
 {
 public:
-    void Input(string input, CommandInterpreter& interp) const override;
-    void OutputStandardMessage(CommandInterpreter& interp) const override;
+    void Input(string input, Interpreter& interp) const override;
+    void OutputStandardMessage(Interpreter& interp) const override;
 };
 
-class CommandInterpreter::AwaitingMoveRoomState : public State
+class Interpreter::AwaitingMoveRoomState : public State
 {
 public:
-    void Input(string input, CommandInterpreter& interp) const override;
-    void OutputStandardMessage(CommandInterpreter& interp) const override;
+    void Input(string input, Interpreter& interp) const override;
+    void OutputStandardMessage(Interpreter& interp) const override;
 };
 
-class CommandInterpreter::AwaitingArrowPathLengthState : public State
+class Interpreter::AwaitingArrowPathLengthState : public State
 {
 public:
-    void Input(string input, CommandInterpreter& interp) const override;
-    void OutputStandardMessage(CommandInterpreter& interp) const override;
+    void Input(string input, Interpreter& interp) const override;
+    void OutputStandardMessage(Interpreter& interp) const override;
 };
 
-class CommandInterpreter::AwaitingArrowRoomState : public State
+class Interpreter::AwaitingArrowRoomState : public State
 {
 public:
-    void Input(string input, CommandInterpreter& interp) const override;
-    void OutputStandardMessage(CommandInterpreter& interp) const override;
+    void Input(string input, Interpreter& interp) const override;
+    void OutputStandardMessage(Interpreter& interp) const override;
 };
 
-class CommandInterpreter::AwaitingReplayState : public State
+class Interpreter::AwaitingReplayState : public State
 {
 public:
-    void Input(string input, CommandInterpreter& interp) const override;
-    void OutputStandardMessage(CommandInterpreter& interp) const override;
+    void Input(string input, Interpreter& interp) const override;
+    void OutputStandardMessage(Interpreter& interp) const override;
 };
 
-CommandInterpreter::InitialState CommandInterpreter::Initial;
-CommandInterpreter::AwaitingCommandState CommandInterpreter::AwaitingCommand;
-CommandInterpreter::AwaitingMoveRoomState CommandInterpreter::AwaitingMoveRoom;
-CommandInterpreter::AwaitingArrowPathLengthState CommandInterpreter::AwaitingArrowPathLength;
-CommandInterpreter::AwaitingArrowRoomState CommandInterpreter::AwaitingArrowRoom;
-CommandInterpreter::AwaitingReplayState CommandInterpreter::AwaitingReplay;
+Interpreter::InitialState Interpreter::Initial;
+Interpreter::AwaitingCommandState Interpreter::AwaitingCommand;
+Interpreter::AwaitingMoveRoomState Interpreter::AwaitingMoveRoom;
+Interpreter::AwaitingArrowPathLengthState Interpreter::AwaitingArrowPathLength;
+Interpreter::AwaitingArrowRoomState Interpreter::AwaitingArrowRoom;
+Interpreter::AwaitingReplayState Interpreter::AwaitingReplay;
 
-CommandInterpreter::CommandInterpreter(GameCommands& commands, const PlayerState& playerState)
+Interpreter::Interpreter(Commands& commands, const PlayerState& playerState)
     : m_commands(commands)
     , m_playerState(playerState)
     , m_state(&Initial)
 {
 }
 
-void CommandInterpreter::Run(istream& in, ostream& out)
+void Interpreter::Run(istream& in, ostream& out)
 {
     string input = RandomPlacements;
     while (!in.eof())
@@ -103,7 +103,7 @@ void CommandInterpreter::Run(istream& in, ostream& out)
     }
 }
 
-strvec CommandInterpreter::Input(string input)
+strvec Interpreter::Input(string input)
 {
     m_output.clear();
     const State* prevState = m_state;
@@ -113,7 +113,7 @@ strvec CommandInterpreter::Input(string input)
     return m_output;
 }
 
-void CommandInterpreter::InitialState::Input(string input, CommandInterpreter& interp) const
+void Interpreter::InitialState::Input(string input, Interpreter& interp) const
 {
     interp.Output(Msg::HuntTheWumpus);
 
@@ -141,13 +141,13 @@ void CommandInterpreter::InitialState::Input(string input, CommandInterpreter& i
     }
 }
 
-void CommandInterpreter::InitialState::OutputStandardMessage(CommandInterpreter& interp) const
+void Interpreter::InitialState::OutputStandardMessage(Interpreter& interp) const
 {
     interp.OutputPlayerState();
     interp.Output("");
 }
 
-void CommandInterpreter::AwaitingCommandState::Input(string input, CommandInterpreter& interp) const
+void Interpreter::AwaitingCommandState::Input(string input, Interpreter& interp) const
 {
     if (input == "")
     {
@@ -168,12 +168,12 @@ void CommandInterpreter::AwaitingCommandState::Input(string input, CommandInterp
     }
 }
 
-void CommandInterpreter::AwaitingCommandState::OutputStandardMessage(CommandInterpreter& interp) const
+void Interpreter::AwaitingCommandState::OutputStandardMessage(Interpreter& interp) const
 {
     interp.Output(Msg::ShootOrMove);
 }
 
-void CommandInterpreter::AwaitingMoveRoomState::Input(string input, CommandInterpreter& interp) const
+void Interpreter::AwaitingMoveRoomState::Input(string input, Interpreter& interp) const
 {
     if (input == "")
     {
@@ -212,12 +212,12 @@ void CommandInterpreter::AwaitingMoveRoomState::Input(string input, CommandInter
     }
 }
 
-void CommandInterpreter::AwaitingMoveRoomState::OutputStandardMessage(CommandInterpreter& interp) const
+void Interpreter::AwaitingMoveRoomState::OutputStandardMessage(Interpreter& interp) const
 {
     interp.Output(Msg::WhereTo);
 }
 
-void CommandInterpreter::AwaitingArrowPathLengthState::Input(string input, CommandInterpreter& interp) const
+void Interpreter::AwaitingArrowPathLengthState::Input(string input, Interpreter& interp) const
 {
     if (input == "")
     {
@@ -244,12 +244,12 @@ void CommandInterpreter::AwaitingArrowPathLengthState::Input(string input, Comma
     }
 }
 
-void CommandInterpreter::AwaitingArrowPathLengthState::OutputStandardMessage(CommandInterpreter& interp) const
+void Interpreter::AwaitingArrowPathLengthState::OutputStandardMessage(Interpreter& interp) const
 {
     interp.Output(Msg::NumberOfRooms);
 }
 
-void CommandInterpreter::AwaitingArrowRoomState::Input(string input, CommandInterpreter& interp) const
+void Interpreter::AwaitingArrowRoomState::Input(string input, Interpreter& interp) const
 {
     if (input == "")
     {
@@ -306,12 +306,12 @@ void CommandInterpreter::AwaitingArrowRoomState::Input(string input, CommandInte
     }
 }
 
-void CommandInterpreter::AwaitingArrowRoomState::OutputStandardMessage(CommandInterpreter& interp) const
+void Interpreter::AwaitingArrowRoomState::OutputStandardMessage(Interpreter& interp) const
 {
     interp.Output(Msg::RoomNumber);
 }
 
-void CommandInterpreter::AwaitingReplayState::Input(string input, CommandInterpreter& interp) const
+void Interpreter::AwaitingReplayState::Input(string input, Interpreter& interp) const
 {
     if (input == "")
     {
@@ -360,23 +360,23 @@ void CommandInterpreter::AwaitingReplayState::Input(string input, CommandInterpr
     }
 }
 
-void CommandInterpreter::AwaitingReplayState::OutputStandardMessage(CommandInterpreter& interp) const
+void Interpreter::AwaitingReplayState::OutputStandardMessage(Interpreter& interp) const
 {
     interp.Output(Msg::SameSetup);
 }
 
-void CommandInterpreter::Output(const string& str)
+void Interpreter::Output(const string& str)
 {
     m_output.push_back(str);
 }
 
-void CommandInterpreter::OutputEvents(const eventvec& events)
+void Interpreter::OutputEvents(const eventvec& events)
 {
     for (Event event : events)
         Output(EventMsgs.at(event));
 }
 
-void CommandInterpreter::OutputPlayerState()
+void Interpreter::OutputPlayerState()
 {
     if (m_playerState.WumpusAdjacent())
         Output(Msg::SmellWumpus);
@@ -395,7 +395,7 @@ void CommandInterpreter::OutputPlayerState()
     Output(out2.str());
 }
 
-void CommandInterpreter::SetState(const State& state)
+void Interpreter::SetState(const State& state)
 {
     m_state = &state;
 }

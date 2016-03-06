@@ -2,12 +2,12 @@
 
 #include <sstream>
 
-#include "CommandInterpreter.h"
-#include "GameCommands.h"
+#include "Interpreter.h"
+#include "Commands.h"
 #include "Msg.h"
 #include "PlayerState.h"
 
-class GameCommandsSpy : public GameCommands
+class CommandsSpy : public Commands
 {
 public:
     eventvec RandomPlacements() override
@@ -129,7 +129,7 @@ public:
 };
 
 namespace {
-    void RequireCommands(const GameCommandsSpy& commands, const strvec& invoked)
+    void RequireCommands(const CommandsSpy& commands, const strvec& invoked)
     {
         REQUIRE(commands.invoked == invoked);
     }
@@ -159,11 +159,11 @@ namespace {
     }
 }
 
-TEST_CASE("CommandInterpreter")
+TEST_CASE("Interpreter")
 {
-    GameCommandsSpy commands;
+    CommandsSpy commands;
     PlayerStateStub playerState;
-    CommandInterpreter interp(commands, playerState);
+    Interpreter interp(commands, playerState);
 
     SECTION("Initial state")
     {
@@ -198,7 +198,7 @@ TEST_CASE("CommandInterpreter")
 
     SECTION("Initial state, random init")
     {
-        auto output = interp.Input(CommandInterpreter::RandomPlacements);
+        auto output = interp.Input(Interpreter::RandomPlacements);
         RequireCommands(commands, { "RandomPlacements" });
         RequireNextMoveOutput(output, { Msg::HuntTheWumpus, "" });
     }
@@ -207,7 +207,7 @@ TEST_CASE("CommandInterpreter")
     {
         commands.events = { Event::BumpedWumpus, Event::EatenByWumpus };
         playerState.playerAlive = false;
-        auto output = interp.Input(CommandInterpreter::RandomPlacements);
+        auto output = interp.Input(Interpreter::RandomPlacements);
         RequireCommands(commands, { "RandomPlacements" });
         RequireOutput(output, { Msg::HuntTheWumpus, "", Msg::BumpedWumpus, Msg::WumpusGotYou, Msg::YouLose, Msg::SameSetup });
     }

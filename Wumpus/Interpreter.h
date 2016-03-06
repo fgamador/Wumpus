@@ -1,19 +1,19 @@
 #pragma once
 
 #include <iostream>
-#include "GameModel.h"
-#include "typedefs.h"
+#include "Model.h"
+#include "stdtypes.h"
 
 using std::istream;
 using std::ostream;
 
-class CommandInterpreter
+class Interpreter
 {
 public:
     static const string RandomPlacements;
     static const map<Event, string> EventMsgs;
 
-    CommandInterpreter(GameCommands& commands, const PlayerState& playerState);
+    Interpreter(Commands& commands, const PlayerState& playerState);
 
     void Run(istream& in, ostream& out);
     strvec Input(string input);
@@ -34,7 +34,7 @@ private:
     void SetState(const State& state);
 
 private:
-    GameCommands& m_commands;
+    Commands& m_commands;
     const PlayerState& m_playerState;
     const State* m_state;
     strvec m_output;

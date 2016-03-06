@@ -1,12 +1,12 @@
 #include "catch.hpp"
 
-#include "GameModel.h"
+#include "Model.h"
 #include "RandomSourceStub.h"
 
-TEST_CASE("Game model")
+TEST_CASE("Model")
 {
     RandomSourceStub randomSource;
-    GameModel model(randomSource);
+    Model model(randomSource);
 
     SECTION("Random init")
     {
@@ -323,7 +323,7 @@ TEST_CASE("Game model")
         SECTION("Out of arrows")
         {
             model.SetWumpusRoom(20);
-            for (int i = 0; i < GameModel::MaxArrows; ++i)
+            for (int i = 0; i < Model::MaxArrows; ++i)
             {
                 model.PrepareArrow(1);
                 model.MoveArrow(10);
@@ -447,7 +447,7 @@ TEST_CASE("Game model")
         {
             model.PrepareArrow(1);
             model.Replay();
-            REQUIRE(model.GetArrowsRemaining() == GameModel::MaxArrows);
+            REQUIRE(model.GetArrowsRemaining() == Model::MaxArrows);
             REQUIRE(model.GetArrowMovesRemaining() == 0);
         }
 
@@ -476,7 +476,7 @@ TEST_CASE("Game model")
             model.PrepareArrow(1);
             randomSource.SetNextInts({ 9, 3 });
             model.Restart();
-            REQUIRE(model.GetArrowsRemaining() == GameModel::MaxArrows);
+            REQUIRE(model.GetArrowsRemaining() == Model::MaxArrows);
             REQUIRE(model.GetArrowMovesRemaining() == 0);
         }
     }

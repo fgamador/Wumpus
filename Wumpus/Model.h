@@ -4,8 +4,8 @@
 #include "ArrowDoubleBackException.h"
 #include "ArrowPathLengthException.h"
 #include "Event.h"
-#include "GameCommands.h"
-#include "GameMap.h"
+#include "Commands.h"
+#include "Map.h"
 #include "RandomSource.h"
 #include "OutOfArrowsException.h"
 #include "PlayerState.h"
@@ -14,12 +14,12 @@
 
 typedef array<int, 2> ints2;
 
-class GameModel : public GameCommands, public PlayerState
+class Model : public Commands, public PlayerState
 {
 public:
     static const int MaxArrows = 5;
 
-    GameModel(RandomSource& randomSource);
+    Model(RandomSource& randomSource);
 
     void SetPlayerRoom(int room);
     void SetWumpusRoom(int room);
@@ -64,7 +64,7 @@ private:
 
 private:
     RandomSource* m_randomSource;
-    GameMap m_map;
+    Map m_map;
     int m_initialPlayerRoom;
     int m_initialWumpusRoom;
 

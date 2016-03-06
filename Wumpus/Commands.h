@@ -5,7 +5,7 @@ using namespace std;
 typedef vector<Event> eventvec;
 typedef vector<int> intvec;
 
-class GameCommands
+class Commands
 {
 public:
     virtual eventvec RandomPlacements() = 0;

@@ -1,6 +1,6 @@
-#include "GameMap.h"
+#include "Map.h"
 
-GameMap::GameMap()
+Map::Map()
 {
     m_connections[1] = { 2, 5, 8 };
     m_connections[2] = { 1, 3, 10 };
@@ -24,7 +24,7 @@ GameMap::GameMap()
     m_connections[20] = { 13, 16, 19 };
 }
 
-ints3 GameMap::GetConnectedRooms(int room) const
+ints3 Map::GetConnectedRooms(int room) const
 {
     if (room < 1 || room > 20)
         throw NoSuchRoomException();
@@ -32,7 +32,7 @@ ints3 GameMap::GetConnectedRooms(int room) const
     return m_connections[room];
 }
 
-bool GameMap::AreConnected(int room1, int room2) const
+bool Map::AreConnected(int room1, int room2) const
 {
     ints3 connectedRooms = m_connections[room1];
     return find(connectedRooms.begin(), connectedRooms.end(), room2) != connectedRooms.end();

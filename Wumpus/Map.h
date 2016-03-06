@@ -7,10 +7,10 @@ using namespace std;
 
 typedef array<int, 3> ints3;
 
-class GameMap
+class Map
 {
 public:
-    GameMap();
+    Map();
 
     ints3 GetConnectedRooms(int room) const;
     bool AreConnected(int room1, int room2) const;

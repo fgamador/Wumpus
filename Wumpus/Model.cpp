@@ -1,4 +1,4 @@
-#include "GameModel.h"
+#include "Model.h"
 
 namespace
 {
@@ -16,13 +16,13 @@ namespace
     }
 }
 
-GameModel::GameModel(RandomSource& randomSource)
+Model::Model(RandomSource& randomSource)
     : m_randomSource(&randomSource)
 {
     Init();
 }
 
-void GameModel::Init()
+void Model::Init()
 {
     m_playerAlive = true;
     m_wumpusRoom = true;
@@ -30,7 +30,7 @@ void GameModel::Init()
     m_arrowMovesRemaining = 0;
 }
 
-eventvec GameModel::RandomPlacements()
+eventvec Model::RandomPlacements()
 {
     m_initialPlayerRoom = m_randomSource->NextInt(1, 20);
     m_wumpusRoom = m_initialWumpusRoom = m_randomSource->NextInt(1, 20);
@@ -41,39 +41,39 @@ eventvec GameModel::RandomPlacements()
     return PlacePlayer(m_initialPlayerRoom);
 }
 
-void GameModel::SetPlayerRoom(int room)
+void Model::SetPlayerRoom(int room)
 {
     ValidateRoom(room);
     m_playerRoom = room;
 }
 
-void GameModel::SetWumpusRoom(int room)
+void Model::SetWumpusRoom(int room)
 {
     ValidateRoom(room);
     m_wumpusRoom = room;
 }
 
-void GameModel::SetBatRooms(int room1, int room2)
+void Model::SetBatRooms(int room1, int room2)
 {
     ValidateRoom(room1);
     ValidateRoom(room2);
     m_batRooms = { room1, room2 };
 }
 
-void GameModel::SetPitRooms(int room1, int room2)
+void Model::SetPitRooms(int room1, int room2)
 {
     ValidateRoom(room1);
     ValidateRoom(room2);
     m_pitRooms = { room1, room2 };
 }
 
-eventvec GameModel::MovePlayer(int room)
+eventvec Model::MovePlayer(int room)
 {
     ValidateMovePlayer(room);
     return PlacePlayer(room);
 }
 
-void GameModel::ValidateMovePlayer(int room)
+void Model::ValidateMovePlayer(int room)
 {
     if (!m_playerAlive)
         throw PlayerDeadException();
@@ -82,7 +82,7 @@ void GameModel::ValidateMovePlayer(int room)
         throw RoomsNotConnectedException();
 }
 
-eventvec GameModel::PlacePlayer(int room)
+eventvec Model::PlacePlayer(int room)
 {
     m_playerRoom = room;
 
@@ -108,7 +108,7 @@ eventvec GameModel::PlacePlayer(int room)
     return {};
 }
 
-eventvec GameModel::BumpedWumpusInBatRoom()
+eventvec Model::BumpedWumpusInBatRoom()
 {
     eventvec events = Append({ Event::BumpedWumpus }, BatSnatch());
     if (!m_playerAlive)
@@ -117,7 +117,7 @@ eventvec GameModel::BumpedWumpusInBatRoom()
     return Append(events, MoveWumpus());
 }
 
-eventvec GameModel::BumpedWumpusInPitRoom()
+eventvec Model::BumpedWumpusInPitRoom()
 {
     eventvec events = BumpedWumpus();
     if (!m_playerAlive)
@@ -126,12 +126,12 @@ eventvec GameModel::BumpedWumpusInPitRoom()
     return Append(events, FellInPit());
 }
 
-eventvec GameModel::BumpedWumpus()
+eventvec Model::BumpedWumpus()
 {
     return Append({ Event::BumpedWumpus }, MoveWumpus());
 }
 
-eventvec GameModel::MoveWumpus()
+eventvec Model::MoveWumpus()
 {
     ints3 connectedRooms = m_map.GetConnectedRooms(m_wumpusRoom);
     unsigned roomIndex = static_cast<unsigned>(m_randomSource->NextInt(0, 3));
@@ -147,18 +147,18 @@ eventvec GameModel::MoveWumpus()
     return {};
 }
 
-eventvec GameModel::BatSnatch()
+eventvec Model::BatSnatch()
 {
     return Append({ Event::BatSnatch }, PlacePlayer(m_randomSource->NextInt(1, 20)));
 }
 
-eventvec GameModel::FellInPit()
+eventvec Model::FellInPit()
 {
     m_playerAlive = false;
     return { Event::FellInPit };
 }
 
-void GameModel::PrepareArrow(int pathLength)
+void Model::PrepareArrow(int pathLength)
 {
     if (m_arrowMovesRemaining > 0)
         throw ArrowAlreadyPreparedException();
@@ -172,7 +172,7 @@ void GameModel::PrepareArrow(int pathLength)
     m_arrowRoom = m_prevArrowRoom = m_playerRoom;
 }
 
-eventvec GameModel::MoveArrow(int room)
+eventvec Model::MoveArrow(int room)
 {
     ValidateMoveArrow(room);
 
@@ -192,7 +192,7 @@ eventvec GameModel::MoveArrow(int room)
     return {};
 }
 
-void GameModel::ValidateMoveArrow(int room)
+void Model::ValidateMoveArrow(int room)
 {
     if (m_arrowMovesRemaining <= 0)
         throw ArrowPathLengthException();
@@ -203,92 +203,92 @@ void GameModel::ValidateMoveArrow(int room)
         throw ArrowDoubleBackException();
 }
 
-eventvec GameModel::ShotSelf()
+eventvec Model::ShotSelf()
 {
     m_playerAlive = false;
     return { Event::ShotSelf };
 }
 
-eventvec GameModel::ShotWumpus()
+eventvec Model::ShotWumpus()
 {
     m_wumpusAlive = false;
     return { Event::KilledWumpus };
 }
 
-eventvec GameModel::MissedWumpus()
+eventvec Model::MissedWumpus()
 {
     return Append({ Event::MissedWumpus }, MoveWumpus());
 }
 
-eventvec GameModel::Replay()
+eventvec Model::Replay()
 {
     Init();
     m_wumpusRoom = m_initialWumpusRoom;
     return PlacePlayer(m_initialPlayerRoom);
 }
 
-eventvec GameModel::Restart()
+eventvec Model::Restart()
 {
     Init();
     return RandomPlacements();
 }
 
-bool GameModel::PlayerAlive() const
+bool Model::PlayerAlive() const
 {
     return m_playerAlive;
 }
 
-int GameModel::GetPlayerRoom() const
+int Model::GetPlayerRoom() const
 {
     return m_playerRoom;
 }
 
-ints3 GameModel::GetPlayerConnectedRooms() const
+ints3 Model::GetPlayerConnectedRooms() const
 {
     return m_map.GetConnectedRooms(m_playerRoom);
 }
 
-bool GameModel::WumpusAdjacent() const
+bool Model::WumpusAdjacent() const
 {
     return m_map.AreConnected(m_playerRoom, m_wumpusRoom);
 }
 
-bool GameModel::BatsAdjacent() const
+bool Model::BatsAdjacent() const
 {
     return m_map.AreConnected(m_playerRoom, m_batRooms[0]) || m_map.AreConnected(m_playerRoom, m_batRooms[1]);
 }
 
-bool GameModel::PitAdjacent() const
+bool Model::PitAdjacent() const
 {
     return m_map.AreConnected(m_playerRoom, m_pitRooms[0]) || m_map.AreConnected(m_playerRoom, m_pitRooms[1]);
 }
 
-bool GameModel::WumpusAlive() const
+bool Model::WumpusAlive() const
 {
     return m_wumpusAlive;
 }
 
-int GameModel::GetWumpusRoom() const
+int Model::GetWumpusRoom() const
 {
     return m_wumpusRoom;
 }
 
-ints2 GameModel::GetBatRooms() const
+ints2 Model::GetBatRooms() const
 {
     return m_batRooms;
 }
 
-ints2 GameModel::GetPitRooms() const
+ints2 Model::GetPitRooms() const
 {
     return m_pitRooms;
 }
 
-int GameModel::GetArrowsRemaining() const
+int Model::GetArrowsRemaining() const
 {
     return m_arrowsRemaining;
 }
 
-int GameModel::GetArrowMovesRemaining() const
+int Model::GetArrowMovesRemaining() const
 {
     return m_arrowMovesRemaining;
 }

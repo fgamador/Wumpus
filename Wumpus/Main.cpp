@@ -3,8 +3,8 @@
 
 #include <iostream>
 
-#include "CommandInterpreter.h"
-#include "GameModel.h"
+#include "Interpreter.h"
+#include "Model.h"
 #include "SimpleRandomSource.h"
 
 int RunTests()
@@ -15,8 +15,8 @@ int RunTests()
 int RunGame()
 {
     SimpleRandomSource randomSource;
-    GameModel model(randomSource);
-    CommandInterpreter interp(model, model);
+    Model model(randomSource);
+    Interpreter interp(model, model);
 
     model.RandomPlacements();
     interp.Run(cin, cout);

@@ -1,6 +1,6 @@
 #include "catch.hpp"
 
-#include "CommandInterpreter.h"
+#include "Interpreter.h"
 #include "Msg.h"
 #include "RandomSourceStub.h"
 
@@ -31,12 +31,12 @@ namespace {
 TEST_CASE("Article full game")
 {
     RandomSourceStub randomSource;
-    GameModel model(randomSource);
-    CommandInterpreter interp(model, model);
+    Model model(randomSource);
+    Interpreter interp(model, model);
 
     randomSource.SetNextInts({ 2, 16, 1, 11, 7, 8 });
 
-    auto output = interp.Input(CommandInterpreter::RandomPlacements);
+    auto output = interp.Input(Interpreter::RandomPlacements);
     RequireNextMoveOutput(output, { Msg::HuntTheWumpus, "", Msg::BatsNearby }, 2, { 1, 3, 10 });
 
     output = interp.Input("M");

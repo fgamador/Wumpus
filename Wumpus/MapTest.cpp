@@ -1,11 +1,11 @@
 #include "catch.hpp"
-#include "GameMap.h"
+#include "Map.h"
 #include <algorithm>
 #include <set>
 
-TEST_CASE("GameMap::GetConnectedRooms")
+TEST_CASE("Map")
 {
-    GameMap map;
+    Map map;
 
     SECTION("Room 2")
     {
