@@ -28,6 +28,7 @@ private:
     class AwaitingReplayState;
 
 private:
+    void CheckPlayerAlive();
     void Output(const string& str);
     void OutputEvents(const eventvec& events);
     void OutputPlayerState();

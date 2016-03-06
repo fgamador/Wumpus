@@ -67,6 +67,7 @@ class Interpreter::AwaitingReplayState : public State
 {
 public:
     void Input(string input, Interpreter& interp) const override;
+    void StartGame(const eventvec& events, Interpreter& interp) const;
     void OutputStandardMessage(Interpreter& interp) const override;
 };
 
@@ -129,16 +130,7 @@ void Interpreter::InitialState::Input(string input, Interpreter& interp) const
     interp.Output("");
     interp.OutputEvents(events);
 
-    if (interp.m_playerState.PlayerAlive())
-    {
-        OutputStandardMessage(interp);
-        interp.SetState(AwaitingCommand);
-    }
-    else
-    {
-        interp.Output(Msg::YouLose);
-        interp.SetState(AwaitingReplay);
-    }
+    interp.CheckPlayerAlive();
 }
 
 void Interpreter::InitialState::OutputStandardMessage(Interpreter& interp) const
@@ -200,16 +192,7 @@ void Interpreter::AwaitingMoveRoomState::Input(string input, Interpreter& interp
         return;
     }
 
-    if (interp.m_playerState.PlayerAlive())
-    {
-        Initial.OutputStandardMessage(interp);
-        interp.SetState(AwaitingCommand);
-    }
-    else
-    {
-        interp.Output(Msg::YouLose);
-        interp.SetState(AwaitingReplay);
-    }
+    interp.CheckPlayerAlive();
 }
 
 void Interpreter::AwaitingMoveRoomState::OutputStandardMessage(Interpreter& interp) const
@@ -320,38 +303,12 @@ void Interpreter::AwaitingReplayState::Input(string input, Interpreter& interp) 
     else if (input == "Y" || input == "y")
     {
         eventvec events = interp.m_commands.Replay();
-        interp.Output(Msg::HuntTheWumpus);
-        interp.Output("");
-        interp.OutputEvents(events);
-
-        if (interp.m_playerState.PlayerAlive())
-        {
-            Initial.OutputStandardMessage(interp);
-            interp.SetState(AwaitingCommand);
-        }
-        else
-        {
-            interp.Output(Msg::YouLose);
-            OutputStandardMessage(interp);
-        }
+        StartGame(events, interp);
     }
     else if (input == "N" || input == "n")
     {
         eventvec events = interp.m_commands.Restart();
-        interp.Output(Msg::HuntTheWumpus);
-        interp.Output("");
-        interp.OutputEvents(events);
-
-        if (interp.m_playerState.PlayerAlive())
-        {
-            Initial.OutputStandardMessage(interp);
-            interp.SetState(AwaitingCommand);
-        }
-        else
-        {
-            interp.Output(Msg::YouLose);
-            OutputStandardMessage(interp);
-        }
+        StartGame(events, interp);
     }
     else
     {
@@ -360,9 +317,35 @@ void Interpreter::AwaitingReplayState::Input(string input, Interpreter& interp) 
     }
 }
 
+void Interpreter::AwaitingReplayState::StartGame(const eventvec& events, Interpreter& interp) const
+{
+    interp.Output(Msg::HuntTheWumpus);
+    interp.Output("");
+    interp.OutputEvents(events);
+    interp.CheckPlayerAlive();
+    // TODO lame; we're already in AwaitingReplayState, so msg not automatically output
+    if (!interp.m_playerState.PlayerAlive())
+        OutputStandardMessage(interp);
+}
+
 void Interpreter::AwaitingReplayState::OutputStandardMessage(Interpreter& interp) const
 {
     interp.Output(Msg::SameSetup);
+}
+
+void Interpreter::CheckPlayerAlive()
+{
+    if (m_playerState.PlayerAlive())
+    {
+        OutputPlayerState();
+        Output("");
+        SetState(AwaitingCommand);
+    }
+    else
+    {
+        Output(Msg::YouLose);
+        SetState(AwaitingReplay);
+    }
 }
 
 void Interpreter::Output(const string& str)
