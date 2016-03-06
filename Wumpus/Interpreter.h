@@ -10,7 +10,7 @@ using std::ostream;
 class Interpreter
 {
 public:
-    static const string RandomPlacements;
+    static const string Randomize;
     static const map<Event, string> EventMsgs;
 
     Interpreter(Commands& commands, const PlayerState& playerState);

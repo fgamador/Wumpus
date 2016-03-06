@@ -36,7 +36,7 @@ TEST_CASE("Article full game")
 
     randomSource.SetNextInts({ 2, 16, 1, 11, 7, 8 });
 
-    auto output = interp.Input(Interpreter::RandomPlacements);
+    auto output = interp.Input(Interpreter::Randomize);
     RequireNextMoveOutput(output, { Msg::HuntTheWumpus, "", Msg::BatsNearby }, 2, { 1, 3, 10 });
 
     output = interp.Input("M");

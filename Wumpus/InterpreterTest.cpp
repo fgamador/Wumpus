@@ -198,7 +198,7 @@ TEST_CASE("Interpreter")
 
     SECTION("Initial state, random init")
     {
-        auto output = interp.Input(Interpreter::RandomPlacements);
+        auto output = interp.Input(Interpreter::Randomize);
         RequireCommands(commands, { "RandomPlacements" });
         RequireNextMoveOutput(output, { Msg::HuntTheWumpus, "" });
     }
@@ -207,7 +207,7 @@ TEST_CASE("Interpreter")
     {
         commands.events = { Event::BumpedWumpus, Event::EatenByWumpus };
         playerState.playerAlive = false;
-        auto output = interp.Input(Interpreter::RandomPlacements);
+        auto output = interp.Input(Interpreter::Randomize);
         RequireCommands(commands, { "RandomPlacements" });
         RequireOutput(output, { Msg::HuntTheWumpus, "", Msg::BumpedWumpus, Msg::WumpusGotYou, Msg::YouLose, Msg::SameSetup });
     }

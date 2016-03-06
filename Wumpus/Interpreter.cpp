@@ -5,7 +5,7 @@
 
 #include "Msg.h"
 
-const string Interpreter::RandomPlacements("[RandomPlacements]");
+const string Interpreter::Randomize = "[Randomize]";
 
 const map<Event, string> Interpreter::EventMsgs =
 {
@@ -86,7 +86,7 @@ Interpreter::Interpreter(Commands& commands, const PlayerState& playerState)
 
 void Interpreter::Run(istream& in, ostream& out)
 {
-    string input = RandomPlacements;
+    string input = Randomize;
     while (!in.eof())
     {
         strvec output = Input(input);
