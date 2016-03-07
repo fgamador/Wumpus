@@ -491,20 +491,36 @@ TEST_CASE("Interpreter")
     SECTION("Stream I/O")
     {
         stringstream in;
-        in << "M" << endl;
         ostringstream out;
 
-        interp.Run(in, out);
+        SECTION("Respond to input")
+        {
+            in << "M" << endl;
 
-        ostringstream expected;
-        expected
-            << Msg::HuntTheWumpus << endl
-            << endl
-            << Msg::YouAreInRoom << "1" << endl
-            << Msg::TunnelsLeadTo << "2 3 4" << endl
-            << endl
-            << Msg::ShootOrMove
-            << Msg::WhereTo;
-        REQUIRE(out.str() == expected.str());
+            interp.Run(in, out);
+
+            ostringstream expected;
+            expected
+                << Msg::HuntTheWumpus << endl
+                << endl
+                << Msg::YouAreInRoom << "1" << endl
+                << Msg::TunnelsLeadTo << "2 3 4" << endl
+                << endl
+                << Msg::ShootOrMove
+                << Msg::WhereTo;
+            REQUIRE(out.str() == expected.str());
+        }
+
+        SECTION("Run loop exits at game end")
+        {
+            in << "EXTRA" << endl;
+            playerState.wumpusAlive = false;
+
+            interp.Run(in, out);
+
+            string input;
+            getline(in, input);
+            REQUIRE(input == "EXTRA");
+        }
     }
 }
