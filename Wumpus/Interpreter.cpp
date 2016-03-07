@@ -154,14 +154,22 @@ void Interpreter::AwaitingCommandState::OutputEntryMessage(Interpreter& interp) 
 
 const Interpreter::State& Interpreter::AwaitingCommandState::Input(string input, Interpreter& interp) const
 {
-    if (input == "M" || input == "m")
-        return AwaitingMoveRoom;
-    if (input == "S" || input == "s")
-        return AwaitingArrowPathLength;
+    if (input == "")
+        return *this;
 
-    if (input != "")
+    if (input == "M" || input == "m")
+    {
+        return AwaitingMoveRoom;
+    }
+    else if (input == "S" || input == "s")
+    {
+        return AwaitingArrowPathLength;
+    }
+    else
+    {
         interp.Output(Msg::Huh);
-    return *this;
+        return *this;
+    }
 }
 
 void Interpreter::AwaitingMoveRoomState::OutputEntryMessage(Interpreter& interp) const
