@@ -108,5 +108,5 @@ TEST_CASE("Article full game")
     RequireOutput(output, { Msg::RoomNumber });
 
     output = interp.Input("16");
-    RequireOutput(output, { "", Msg::GotTheWumpus, Msg::GetYouNextTime, Msg::Exit });
+    RequireOutput(output, { "", Msg::GotTheWumpus, Msg::GetYouNextTime });
 }

@@ -429,7 +429,7 @@ TEST_CASE("Interpreter")
             playerState.wumpusAlive = false;
             auto output = interp.Input("12");
             RequireCommands(commands, { "MoveArrow 10", "MoveArrow 11", "MoveArrow 12" });
-            RequireOutput(output, { "", Msg::GotTheWumpus, Msg::GetYouNextTime, Msg::Exit });
+            RequireOutput(output, { "", Msg::GotTheWumpus, Msg::GetYouNextTime });
         }
     }
 

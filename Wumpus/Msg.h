@@ -9,7 +9,6 @@ namespace Msg
     static const string BatsNearby = "BATS NEARBY!";
     static const string BatSnatch = "ZAP--SUPER BAT SNATCH! ELSEWHEREVILLE FOR YOU!";
     static const string BumpedWumpus = "--- OOPS, BUMPED A WUMPUS!";
-    static const string Exit = "[Exit]";
     static const string FeelDraft = "I FEEL A DRAFT";
     static const string FellInPit = "YYYIIIIEEEE... FELL IN PIT";
     static const string GetYouNextTime = "HEE HEE HEE - THE WUMPUS'LL GETCHA NEXT TIME!!";
