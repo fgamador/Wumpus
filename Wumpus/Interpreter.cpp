@@ -112,13 +112,13 @@ void Interpreter::Run(istream& in, ostream& out)
         strvec output = Input(input);
         for (size_t i = 0; i < output.size(); ++i)
         {
-            if (output[i] == Msg::Exit)
-                return;
-
             if (i > 0)
                 out << endl;
             out << output[i];
         }
+        if (m_state == &End)
+            return;
+
         getline(in, input);
     }
 }
@@ -282,7 +282,6 @@ void Interpreter::AwaitingArrowRoomState::MoveArrow(const string& input, Interpr
     if (!interp.m_playerState.WumpusAlive())
     {
         interp.Output(Msg::GetYouNextTime);
-        interp.Output(Msg::Exit);
         interp.SetState(End);
         return;
     }
