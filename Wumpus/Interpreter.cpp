@@ -127,24 +127,21 @@ strvec Interpreter::Input(string input)
 
 void Interpreter::InitialState::OutputEntryMessage(Interpreter& interp) const
 {
-    interp.OutputPlayerState();
-    interp.Output("");
 }
 
 const Interpreter::State& Interpreter::InitialState::Input(string input, Interpreter& interp) const
 {
     interp.Output(Msg::HuntTheWumpus);
-    interp.Output("");
 
-    if (input == "")
+    if (input == Randomize)
     {
-        OutputEntryMessage(interp);
-        return AwaitingCommand;
+        eventvec events = interp.m_commands.RandomPlacements();
+        return interp.CheckAndOutputPlayerState(events);
     }
-
-    eventvec events = interp.m_commands.RandomPlacements();
-    interp.OutputEvents(events);
-    return interp.CheckPlayerAlive();
+    else
+    {
+        return interp.CheckAndOutputPlayerState({});
+    }
 }
 
 void Interpreter::AwaitingCommandState::OutputEntryMessage(Interpreter& interp) const
@@ -201,9 +198,7 @@ const Interpreter::State& Interpreter::AwaitingMoveRoomState::Input(string input
 const Interpreter::State& Interpreter::AwaitingMoveRoomState::MovePlayer(const string& input, Interpreter& interp) const
 {
     eventvec events = interp.m_commands.MovePlayer(stoi(input));
-    interp.Output("");
-    interp.OutputEvents(events);
-    return interp.CheckPlayerAlive();
+    return interp.CheckAndOutputPlayerState(events);
 }
 
 void Interpreter::AwaitingArrowPathLengthState::OutputEntryMessage(Interpreter& interp) const
@@ -270,22 +265,7 @@ const Interpreter::State& Interpreter::AwaitingArrowRoomState::MoveArrow(const s
     if (events.empty())
         return *this;
 
-    interp.Output("");
-    interp.OutputEvents(events);
-
-    if (!interp.m_playerState.WumpusAlive())
-    {
-        interp.Output(Msg::GetYouNextTime);
-        return End;
-    }
-    else if (interp.m_playerState.GetArrowsRemaining() == 0)
-    {
-        interp.Output(Msg::OutOfArrows);
-        interp.Output(Msg::YouLose);
-        return AwaitingReplay;
-    }
-
-    return interp.CheckPlayerAlive();
+    return interp.CheckAndOutputPlayerState(events);
 }
 
 void Interpreter::AwaitingReplayState::OutputEntryMessage(Interpreter& interp) const
@@ -318,29 +298,37 @@ const Interpreter::State& Interpreter::AwaitingReplayState::Input(string input, 
 const Interpreter::State& Interpreter::AwaitingReplayState::StartGame(const eventvec& events, Interpreter& interp) const
 {
     interp.Output(Msg::HuntTheWumpus);
-    interp.Output("");
-    interp.OutputEvents(events);
-    return interp.CheckPlayerAlive();
+    return interp.CheckAndOutputPlayerState(events);
 }
 
-const Interpreter::State& Interpreter::CheckPlayerAlive()
+const Interpreter::State& Interpreter::CheckAndOutputPlayerState(const eventvec& events)
 {
-    if (m_playerState.PlayerAlive())
+    Output("");
+    OutputEvents(events);
+
+    if (!m_playerState.WumpusAlive())
     {
-        OutputPlayerState();
-        Output("");
-        return AwaitingCommand;
+        Output(Msg::GetYouNextTime);
+        return End;
     }
-    else
+    else if (!m_playerState.PlayerAlive())
     {
         Output(Msg::YouLose);
         return AwaitingReplay;
     }
-}
-
-void Interpreter::Output(const string& str)
-{
-    m_output.push_back(str);
+    else if (m_playerState.GetArrowsRemaining() == 0)
+    {
+        Output(Msg::OutOfArrows);
+        Output(Msg::YouLose);
+        return AwaitingReplay;
+    }
+    else
+    {
+        OutputAdjacentHazards();
+        OutputPlayerLocation();
+        Output("");
+        return AwaitingCommand;
+    }
 }
 
 void Interpreter::OutputEvents(const eventvec& events)
@@ -349,7 +337,7 @@ void Interpreter::OutputEvents(const eventvec& events)
         Output(EventMsgs.at(event));
 }
 
-void Interpreter::OutputPlayerState()
+void Interpreter::OutputAdjacentHazards()
 {
     if (m_playerState.WumpusAdjacent())
         Output(Msg::SmellWumpus);
@@ -357,13 +345,19 @@ void Interpreter::OutputPlayerState()
         Output(Msg::BatsNearby);
     if (m_playerState.PitAdjacent())
         Output(Msg::FeelDraft);
+}
 
-    ostringstream out1;
-    out1 << Msg::YouAreInRoom << m_playerState.GetPlayerRoom();
-    Output(out1.str());
+void Interpreter::OutputPlayerLocation()
+{
+    Output(Msg::YouAreInRoom + to_string(m_playerState.GetPlayerRoom()));
 
     ints3 connected = m_playerState.GetPlayerConnectedRooms();
     ostringstream out2;
     out2 << Msg::TunnelsLeadTo << connected[0] << " " << connected[1] << " " << connected[2];
     Output(out2.str());
+}
+
+void Interpreter::Output(const string& str)
+{
+    m_output.push_back(str);
 }

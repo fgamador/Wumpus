@@ -29,10 +29,11 @@ private:
     class EndState;
 
 private:
-    const State& CheckPlayerAlive();
-    void Output(const string& str);
+    const State& CheckAndOutputPlayerState(const eventvec& events);
     void OutputEvents(const eventvec& events);
-    void OutputPlayerState();
+    void OutputAdjacentHazards();
+    void OutputPlayerLocation();
+    void Output(const string& str);
 
 private:
     Commands& m_commands;
