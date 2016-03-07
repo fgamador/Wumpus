@@ -19,13 +19,9 @@ const map<Event, string> Interpreter::EventMsgs =
 
 class Interpreter::State
 {
-    static map<Event, string> eventMsgs;
-
 public:
     virtual void Input(string input, Interpreter& interp) const = 0;
     virtual void OutputStateMessage(Interpreter& interp) const = 0;
-
-protected:
 };
 
 class Interpreter::InitialState : public State
@@ -107,7 +103,7 @@ Interpreter::Interpreter(Commands& commands, const PlayerState& playerState)
 void Interpreter::Run(istream& in, ostream& out)
 {
     string input = Randomize;
-    while (!in.eof())
+    while (m_state != &End && !in.eof())
     {
         strvec output = Input(input);
         for (size_t i = 0; i < output.size(); ++i)
@@ -116,17 +112,14 @@ void Interpreter::Run(istream& in, ostream& out)
                 out << endl;
             out << output[i];
         }
-        if (m_state == &End)
-            return;
-
-        getline(in, input);
+        if (m_state != &End)
+            getline(in, input);
     }
 }
 
 strvec Interpreter::Input(string input)
 {
     m_output.clear();
-    const State* prevState = m_state;
     m_state->Input(input, *this);
     m_state->OutputStateMessage(*this);
     return m_output;
