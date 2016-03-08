@@ -1,9 +1,8 @@
 #pragma once
 
-#include <vector>
-using namespace std;
-typedef vector<Event> eventvec;
-typedef vector<int> intvec;
+#include "Event.h"
+
+using eventvec = vector<Event>;
 
 class Commands
 {

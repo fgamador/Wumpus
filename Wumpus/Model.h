@@ -1,18 +1,10 @@
 #pragma once
 
-#include "ArrowAlreadyPreparedException.h"
-#include "ArrowDoubleBackException.h"
-#include "ArrowPathLengthException.h"
-#include "Event.h"
 #include "Commands.h"
+#include "Event.h"
 #include "Map.h"
-#include "RandomSource.h"
-#include "OutOfArrowsException.h"
 #include "PlayerState.h"
-#include "PlayerDeadException.h"
-#include "RoomsNotConnectedException.h"
-
-typedef array<int, 2> ints2;
+#include "RandomSource.h"
 
 class Model : public Commands, public PlayerState
 {

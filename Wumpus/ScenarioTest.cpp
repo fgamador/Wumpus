@@ -1,7 +1,7 @@
 #include "catch.hpp"
 
-#include "Interpreter.h"
 #include "Msg.h"
+#include "Interpreter.h"
 #include "RandomSourceStub.h"
 
 namespace {

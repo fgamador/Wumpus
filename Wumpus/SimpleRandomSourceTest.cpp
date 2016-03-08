@@ -1,10 +1,7 @@
 #include "catch.hpp"
 
-#include <array>
-
 #include "SimpleRandomSource.h"
-
-using namespace std;
+#include "stdtypes.h"
 
 TEST_CASE("SimpleRandomSource", "[.]")
 {

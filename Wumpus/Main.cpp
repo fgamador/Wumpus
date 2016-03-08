@@ -1,9 +1,8 @@
 #define CATCH_CONFIG_RUNNER
 #include "catch.hpp"
 
-#include <iostream>
-
 #include "Interpreter.h"
+#include <iostream>
 #include "Model.h"
 #include "SimpleRandomSource.h"
 

@@ -1,9 +1,7 @@
 #include "Interpreter.h"
 
-#include <map>
-#include <sstream>
-
 #include "Msg.h"
+#include <sstream>
 
 const string Interpreter::Randomize = "[Randomize]";
 
@@ -14,7 +12,8 @@ const map<Event, string> Interpreter::EventMsgs =
     { Event::EatenByWumpus, Msg::WumpusGotYou },
     { Event::FellInPit, Msg::FellInPit },
     { Event::KilledWumpus, Msg::GotTheWumpus },
-    { Event::MissedWumpus, Msg::Missed }
+    { Event::MissedWumpus, Msg::Missed },
+    { Event::ShotSelf, Msg::HitYourself }
 };
 
 class Interpreter::State

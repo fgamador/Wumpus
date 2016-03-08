@@ -4,9 +4,6 @@
 #include "Model.h"
 #include "stdtypes.h"
 
-using std::istream;
-using std::ostream;
-
 class Interpreter
 {
 public:

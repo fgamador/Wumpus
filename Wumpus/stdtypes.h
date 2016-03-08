@@ -1,11 +1,13 @@
 #pragma once
 
+#include <array>
 #include <map>
 #include <string>
 #include <vector>
 
-using std::map;
-using std::string;
-using std::vector;
+using namespace std;
 
-typedef vector<string> strvec;
+using ints2 = array<int, 2>;
+using ints3 = array<int, 3>;
+using intvec = vector<int>;
+using strvec = vector<string>;

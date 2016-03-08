@@ -76,25 +76,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="ArrowAlreadyPreparedException.h" />
-    <ClInclude Include="ArrowDoubleBackException.h" />
-    <ClInclude Include="ArrowPathLengthException.h" />
     <ClInclude Include="catch.hpp" />
+    <ClInclude Include="Exceptions.h" />
     <ClInclude Include="Interpreter.h" />
     <ClInclude Include="Event.h" />
     <ClInclude Include="Commands.h" />
-    <ClInclude Include="GameException.h" />
     <ClInclude Include="Map.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="RandomSource.h" />
     <ClInclude Include="Msg.h" />
-    <ClInclude Include="NoSuchRoomException.h" />
-    <ClInclude Include="OutOfArrowsException.h" />
-    <ClInclude Include="PlayerDeadException.h" />
     <ClInclude Include="PlayerState.h" />
     <ClInclude Include="SimpleRandomSource.h" />
     <ClInclude Include="RandomSourceStub.h" />
-    <ClInclude Include="RoomsNotConnectedException.h" />
     <ClInclude Include="stdtypes.h" />
   </ItemGroup>
   <ItemGroup>

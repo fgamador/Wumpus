@@ -18,16 +18,7 @@
     <ClInclude Include="catch.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GameException.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NoSuchRoomException.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="PlayerState.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RoomsNotConnectedException.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Msg.h">
@@ -37,21 +28,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Event.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PlayerDeadException.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ArrowPathLengthException.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ArrowDoubleBackException.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="OutOfArrowsException.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ArrowAlreadyPreparedException.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SimpleRandomSource.h">
@@ -73,6 +49,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="stdtypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Exceptions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

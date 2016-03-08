@@ -1,11 +1,10 @@
 #include "catch.hpp"
 
-#include <sstream>
-
-#include "Interpreter.h"
 #include "Commands.h"
+#include "Interpreter.h"
 #include "Msg.h"
 #include "PlayerState.h"
+#include <sstream>
 
 class CommandsSpy : public Commands
 {
@@ -430,6 +429,15 @@ TEST_CASE("Interpreter")
             auto output = interp.Input("12");
             RequireCommands(commands, { "MoveArrow 10", "MoveArrow 11", "MoveArrow 12" });
             RequireOutput(output, { "", Msg::GotTheWumpus, Msg::GetYouNextTime });
+        }
+
+        SECTION("Hit self")
+        {
+            commands.events = { Event::ShotSelf };
+            playerState.playerAlive = false;
+            auto output = interp.Input("10");
+            RequireCommands(commands, { "MoveArrow 10" });
+            RequireOutput(output, { "", Msg::HitYourself, Msg::YouLose, Msg::SameSetup });
         }
     }
 

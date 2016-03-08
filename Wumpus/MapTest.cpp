@@ -1,6 +1,7 @@
 #include "catch.hpp"
-#include "Map.h"
+
 #include <algorithm>
+#include "Map.h"
 #include <set>
 
 TEST_CASE("Map")
