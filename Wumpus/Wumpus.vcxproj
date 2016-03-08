@@ -77,28 +77,28 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="catch.hpp" />
+    <ClInclude Include="Commands.h" />
+    <ClInclude Include="Event.h" />
     <ClInclude Include="Exceptions.h" />
     <ClInclude Include="Interpreter.h" />
-    <ClInclude Include="Event.h" />
-    <ClInclude Include="Commands.h" />
     <ClInclude Include="Map.h" />
     <ClInclude Include="Model.h" />
-    <ClInclude Include="RandomSource.h" />
     <ClInclude Include="Msg.h" />
     <ClInclude Include="PlayerState.h" />
-    <ClInclude Include="SimpleRandomSource.h" />
+    <ClInclude Include="RandomSource.h" />
     <ClInclude Include="RandomSourceStub.h" />
+    <ClInclude Include="SimpleRandomSource.h" />
     <ClInclude Include="stdtypes.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Interpreter.cpp" />
     <ClCompile Include="InterpreterTest.cpp" />
+    <ClCompile Include="Main.cpp" />
     <ClCompile Include="Map.cpp" />
     <ClCompile Include="MapTest.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="ModelTest.cpp" />
     <ClCompile Include="ScenarioTest.cpp" />
-    <ClCompile Include="Main.cpp" />
     <ClCompile Include="SimpleRandomSource.cpp" />
     <ClCompile Include="SimpleRandomSourceTest.cpp" />
   </ItemGroup>
