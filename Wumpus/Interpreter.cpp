@@ -20,7 +20,19 @@ class Interpreter::State
 {
 public:
     virtual void OutputEntryMessage(Interpreter& interp) const = 0;
-    virtual const State& Input(string input, Interpreter& interp) const = 0;
+
+    virtual const State& Input(string input, Interpreter& interp) const
+    {
+        if (input == "")
+            return *this;
+        else
+            return NonEmptyInput(input, interp);
+    }
+
+    virtual const State& NonEmptyInput(string input, Interpreter& interp) const
+    {
+        return *this;
+    }
 };
 
 class Interpreter::InitialState : public State
@@ -34,14 +46,14 @@ class Interpreter::AwaitingCommandState : public State
 {
 public:
     void OutputEntryMessage(Interpreter& interp) const override;
-    const State& Input(string input, Interpreter& interp) const override;
+    const State& NonEmptyInput(string input, Interpreter& interp) const override;
 };
 
 class Interpreter::AwaitingMoveRoomState : public State
 {
 public:
     void OutputEntryMessage(Interpreter& interp) const override;
-    const State& Input(string input, Interpreter& interp) const override;
+    const State& NonEmptyInput(string input, Interpreter& interp) const override;
 
 private:
     const State& MovePlayer(const string& input, Interpreter& interp) const;
@@ -51,7 +63,7 @@ class Interpreter::AwaitingArrowPathLengthState : public State
 {
 public:
     void OutputEntryMessage(Interpreter& interp) const override;
-    const State& Input(string input, Interpreter& interp) const override;
+    const State& NonEmptyInput(string input, Interpreter& interp) const override;
 
 private:
     const State& PrepareArrow(const string& input, Interpreter& interp) const;
@@ -61,7 +73,7 @@ class Interpreter::AwaitingArrowRoomState : public State
 {
 public:
     void OutputEntryMessage(Interpreter& interp) const override;
-    const State& Input(string input, Interpreter& interp) const override;
+    const State& NonEmptyInput(string input, Interpreter& interp) const override;
 
 private:
     const State& MoveArrow(const string& input, Interpreter& interp) const;
@@ -71,7 +83,7 @@ class Interpreter::AwaitingReplayState : public State
 {
 public:
     void OutputEntryMessage(Interpreter& interp) const override;
-    const State& Input(string input, Interpreter& interp) const override;
+    const State& NonEmptyInput(string input, Interpreter& interp) const override;
 
 private:
     const State& StartGame(const eventvec& events, Interpreter& interp) const;
@@ -81,7 +93,7 @@ class Interpreter::EndState : public State
 {
 public:
     void OutputEntryMessage(Interpreter& interp) const override {}
-    const State& Input(string input, Interpreter& interp) const override { return *this; }
+    const State& NonEmptyInput(string input, Interpreter& interp) const override { return *this; }
 };
 
 Interpreter::InitialState Interpreter::Initial;
@@ -148,11 +160,8 @@ void Interpreter::AwaitingCommandState::OutputEntryMessage(Interpreter& interp) 
     interp.Output(Msg::ShootOrMove);
 }
 
-const Interpreter::State& Interpreter::AwaitingCommandState::Input(string input, Interpreter& interp) const
+const Interpreter::State& Interpreter::AwaitingCommandState::NonEmptyInput(string input, Interpreter& interp) const
 {
-    if (input == "")
-        return *this;
-
     if (input == "M" || input == "m")
     {
         return AwaitingMoveRoom;
@@ -173,11 +182,8 @@ void Interpreter::AwaitingMoveRoomState::OutputEntryMessage(Interpreter& interp)
     interp.Output(Msg::WhereTo);
 }
 
-const Interpreter::State& Interpreter::AwaitingMoveRoomState::Input(string input, Interpreter& interp) const
+const Interpreter::State& Interpreter::AwaitingMoveRoomState::NonEmptyInput(string input, Interpreter& interp) const
 {
-    if (input == "")
-        return *this;
-
     try
     {
         return MovePlayer(input, interp);
@@ -205,11 +211,8 @@ void Interpreter::AwaitingArrowPathLengthState::OutputEntryMessage(Interpreter& 
     interp.Output(Msg::NumberOfRooms);
 }
 
-const Interpreter::State& Interpreter::AwaitingArrowPathLengthState::Input(string input, Interpreter& interp) const
+const Interpreter::State& Interpreter::AwaitingArrowPathLengthState::NonEmptyInput(string input, Interpreter& interp) const
 {
-    if (input == "")
-        return *this;
-
     try
     {
         return PrepareArrow(input, interp);
@@ -237,11 +240,8 @@ void Interpreter::AwaitingArrowRoomState::OutputEntryMessage(Interpreter& interp
     interp.Output(Msg::RoomNumber);
 }
 
-const Interpreter::State& Interpreter::AwaitingArrowRoomState::Input(string input, Interpreter& interp) const
+const Interpreter::State& Interpreter::AwaitingArrowRoomState::NonEmptyInput(string input, Interpreter& interp) const
 {
-    if (input == "")
-        return *this;
-
     try
     {
         return MoveArrow(input, interp);
@@ -272,11 +272,8 @@ void Interpreter::AwaitingReplayState::OutputEntryMessage(Interpreter& interp) c
     interp.Output(Msg::SameSetup);
 }
 
-const Interpreter::State& Interpreter::AwaitingReplayState::Input(string input, Interpreter& interp) const
+const Interpreter::State& Interpreter::AwaitingReplayState::NonEmptyInput(string input, Interpreter& interp) const
 {
-    if (input == "")
-        return *this;
-
     if (input == "Y" || input == "y")
     {
         eventvec events = interp.m_commands.Replay();
@@ -306,28 +303,40 @@ const Interpreter::State& Interpreter::CheckAndOutputPlayerState(const eventvec&
     OutputEvents(events);
 
     if (!m_playerState.WumpusAlive())
-    {
-        Output(Msg::GetYouNextTime);
-        return End;
-    }
+        return WumpusDied();
     else if (!m_playerState.PlayerAlive())
-    {
-        Output(Msg::YouLose);
-        return AwaitingReplay;
-    }
+        return PlayerDied();
     else if (m_playerState.GetArrowsRemaining() == 0)
-    {
-        Output(Msg::OutOfArrows);
-        Output(Msg::YouLose);
-        return AwaitingReplay;
-    }
+        return OutOfArrows();
     else
-    {
-        OutputAdjacentHazards();
-        OutputPlayerLocation();
-        Output("");
-        return AwaitingCommand;
-    }
+        return PlayerStillAlive();
+}
+
+const Interpreter::State& Interpreter::WumpusDied()
+{
+    Output(Msg::GetYouNextTime);
+    return End;
+}
+
+const Interpreter::State& Interpreter::PlayerDied()
+{
+    Output(Msg::YouLose);
+    return AwaitingReplay;
+}
+
+const Interpreter::State& Interpreter::OutOfArrows()
+{
+    Output(Msg::OutOfArrows);
+    Output(Msg::YouLose);
+    return AwaitingReplay;
+}
+
+const Interpreter::State& Interpreter::PlayerStillAlive()
+{
+    OutputAdjacentHazards();
+    OutputPlayerLocation();
+    Output("");
+    return AwaitingCommand;
 }
 
 void Interpreter::OutputEvents(const eventvec& events)
