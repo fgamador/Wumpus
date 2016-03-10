@@ -27,6 +27,10 @@ private:
 
 private:
     const State& CheckAndOutputPlayerState(const eventvec& events);
+    const State& WumpusDied();
+    const State& PlayerDied();
+    const State& OutOfArrows();
+    const State& PlayerStillAlive();
     void OutputEvents(const eventvec& events);
     void OutputAdjacentHazards();
     void OutputPlayerLocation();
